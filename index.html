@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta name="referrer" content="no-referrer">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Арена 1х1</title>
+<style>
+    /* Палитра: Dark green, Cal Poly green, Vanilla, Gold, Goldenrod */
+    body { 
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+        background: #06362D; /* Темный зеленый (Фон) */
+        margin: 0; padding: 8px; /* Компактные отступы */
+        color: #DEE2B1; /* Ванильный (Основной текст) */
+        box-sizing: border-box; line-height: 1.4; 
+    }
+    .container { 
+        max-width: 1100px; margin: 0 auto; 
+        background: #155332; /* Cal Poly green (Панель) */
+        padding: 15px; 
+        border-radius: 12px; border: 1px solid #D1A505; /* Goldenrod (Рамка) */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+    }
+    
+    h1, h2, h3 { text-align: center; margin: 0 0 10px 0; font-weight: 600; color: #FFD500; /* Золото */ } 
+    h1 { font-size: 22px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    h2 { font-size: 18px; color: #DEE2B1; }
+    h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #D1A505; padding-bottom: 5px; margin-bottom: 12px; color: #FFD500;}
+    
+    /* Кнопки - Золотые и контрастные */
+    button { 
+        font-family: inherit; 
+        background: #D1A505; /* Goldenrod */
+        color: #06362D; /* Темно-зеленый текст для контраста */
+        border: 2px solid #FFD500; /* Золотая обводка */
+        padding: 12px 20px; font-size: 16px; font-weight: 700; 
+        border-radius: 8px; cursor: pointer; display: block; margin: 10px auto; width: 100%; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; 
+    }
+    button:hover { background: #FFD500; transform: translateY(-1px); box-shadow: 0 6px 10px rgba(0,0,0,0.4); }
+    button:active { transform: translateY(2px); box-shadow: none; }
+    button:disabled { background: #06362D; color: #155332; border-color: #155332; cursor: not-allowed; box-shadow: none; }
+    
+    /* Индивидуальные цвета кнопок действий */
+    #btn-fight { 
+        background: #D1A505; font-size: 18px; border-width: 3px; 
+    }
+    #btn-fight:hover { background: #FFD500; border-color: #DEE2B1; }
+    
+    /* Кнопка "Новый бой" (Акцентная - светлая ваниль) */
+    #btn-next { 
+        background: #DEE2B1; color: #06362D; border: 2px solid #D1A505; 
+    }
+    #btn-next:hover { background: #fff; border-color: #FFD500; }
+    
+    /* Кнопка "Сменить класс" (Второстепенная - цвет Cal Poly green) */
+    #btn-switch { 
+        background: #155332; color: #DEE2B1; border: 2px solid #155332; 
+        font-size: 14.5px; padding: 10px 20px;
+    }
+    #btn-switch:hover { background: #084a3e; border-color: #D1A505; }
+    
+    #start-screen, #combat-screen { display: none; }
+    #start-screen.active, #combat-screen.active { display: block; }
+
+  /* Стартовый экран - интерактивные карточки */
+    .start-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 10px; margin-bottom: 15px; }
+    
+    .class-card { 
+        background: #06362D; border: 2px solid #155332; 
+        padding: 12px; border-radius: 8px; cursor: pointer; transition: 0.3s ease; 
+        display: flex; flex-direction: column;
+    }
+    .class-card:hover { border-color: #D1A505; background: #084a3e; }
+    
+    /* 1. Скрываем уродливые радио-кнопки */
+    .class-card input[type="radio"] { display: none; }
+    
+    /* 2. Подсвечиваем всю карточку при выборе */
+    .class-card:has(input:checked) { 
+        border-color: #FFD500; 
+        background: rgba(209, 165, 5, 0.15); 
+        box-shadow: 0 0 15px rgba(255, 213, 0, 0.2) inset, 0 4px 10px rgba(0, 0, 0, 0.4);
+        transform: translateY(-2px); /* Карточка слегка "приподнимается" */
+    }
+
+    .class-header { font-weight: 700; font-size: 16px; margin-bottom: 6px; color: #FFD500; text-align: center; }
+    .class-desc { color: #DEE2B1; font-size: 13px; line-height: 1.4; text-align: center; }
+    
+    /* 3. Магия анимации навыков (скрыты по умолчанию) */
+    .skills-reveal {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
+    }
+    
+    /* Раскрываем навыки при наведении ИЛИ если класс выбран (супер для iPad) */
+    .class-card:hover .skills-reveal,
+    .class-card:has(input:checked) .skills-reveal {
+        max-height: 300px; /* Запас по высоте для текста */
+        opacity: 1;
+        margin-top: 10px;
+    }
+
+    /* Внутренний стиль выехавшего блока навыков */
+    .skills-inner {
+        font-size: 12.5px; color: #DEE2B1; 
+        background: #06362D; padding: 10px; 
+        border-radius: 6px; border: 1px solid #155332; 
+        border-left: 3px solid #D1A505;
+        line-height: 1.4;
+    }
+
+    /* Панель статистики - Аватарки 90px */
+    .stats-panel { 
+        display: flex; justify-content: space-between; align-items: flex-start;
+        background: #06362D; padding: 12px; border-radius: 10px; border: 1px solid #D1A505; margin-bottom: 12px;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    .player-stats, .bot-stats { width: 45%; display: flex; flex-direction: column; align-items: center; position: relative;}
+    
+    .avatar { 
+        width: 90px; height: 90px;
+        border-radius: 50%; background: #06362D; 
+        border: 3px solid #FFD500; /* Золотая рамка */
+        margin-bottom: 8px; object-fit: cover; 
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
+        flex-shrink: 0; 
+    }
+
+    .bar-container { width: 100%; background: #06362D; height: 16px; border-radius: 8px; margin-top: 5px; overflow: hidden; position: relative; border: 1px solid #D1A505;}
+    .bar-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; font-weight: bold; text-shadow: 0 1px 2px #000; z-index: 2;}
+    .hp-bar { height: 100%; background: linear-gradient(90deg, #c0392b, #e74c3c); transition: width 0.3s ease-in-out; }
+    .res-mana { height: 100%; background: linear-gradient(90deg, #2980b9, #3498db); transition: width 0.3s ease-in-out; }
+    .res-energy { height: 100%; background: linear-gradient(90deg, #D1A505, #FFD500); transition: width 0.3s ease-in-out; }
+    
+    /* Статусы - яркие плашки */
+    .status-bar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 22px; margin-top: 8px; width: 100%;}
+    .status-badge { display: inline-flex; align-items: center; padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+    .sb-burn { background: #d35400; } .sb-poison { background: #27ae60; } .sb-bleed { background: #900c3f; }
+    .sb-curse { background: #5b2c6f; } .sb-ice { background: #2980b9; } .sb-blind { background: #34495e; }
+    .sb-thorns { background: #D1A505; color: #06362D; } .sb-regen { background: #1e8449; }
+    .sb-buff { background: #FFD500; color: #06362D; } .sb-debuff { background: #c0392b; } .sb-shield { background: #7f8c8d; } .sb-vuln { background: #e74c3c; }
+
+    /* Лог боя */
+    #log-area { 
+        height: 35vh; min-height: 200px; max-height: 500px; 
+        overflow-y: auto; background: #06362D; color: #DEE2B1; padding: 12px; 
+        border-radius: 10px; font-size: 13.5px; font-family: "SF Mono", Monaco, Consolas, monospace; 
+        border: 1px solid #D1A505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+    }
+    .log-msg { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #155332; line-height: 1.4;}
+    
+    /* Подсветка текста в логе */
+    .crit { color: #FFD500; font-weight: bold; } .hit { color: #fff; font-weight: 600;}
+    .dodge { color: #a9dfbf; font-style: italic; } .block { color: #f39c12; font-weight: 600;}
+    .system { color: #D1A505; font-weight: 700; border-top: 1px solid #155332; padding-top: 8px; margin-top: 8px;} 
+    .warning { color: #FFD500; font-weight: bold; }
+    .spell { color: #c39bd3; font-weight: 600; } .heal { color: #2ecc71; font-weight: 600; }
+    .dot { color: #e74c3c; }
+
+    /* Лейаут боя */
+    .combat-layout { display: flex; flex-direction: column; gap: 12px; }
+    @media (min-width: 768px) {
+        .combat-layout { flex-direction: row; align-items: stretch; }
+        .combat-left { flex: 6; display: flex; flex-direction: column; gap: 12px;} 
+        .combat-right { flex: 4; display: flex; flex-direction: column; justify-content: space-between;}
+    }
+
+  /* Управление - Панели */
+    .controls { display: flex; flex-direction: column; gap: 10px; height: 100%;}
+    .control-box { background: #06362D; padding: 12px; border: 1px solid #D1A505; border-radius: 10px; flex-grow: 1; box-shadow: inset 0 0 10px rgba(0,0,0,0.3);}
+    
+    .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+    
+    /* Добавляем зазор в 8 пикселей между навыками! */
+    .options-column { display: flex; flex-direction: column; gap: 8px; } 
+    
+    .control-box label { 
+        display: flex; align-items: center; justify-content: center; /* Центрируем текст для красивых кнопок */
+        padding: 10px 12px; margin: 0; 
+        background: #155332; border: 1px solid #155332; border-radius: 6px; 
+        cursor: pointer; font-size: 13.5px; color: #DEE2B1; transition: 0.15s; font-weight: 500;
+        text-align: center;
+    }
+    .control-box label:hover:not(.disabled) { border-color: #D1A505; background: #084a3e; }
+    
+    /* УБИРАЕМ КРУЖОЧКИ ВЕЗДЕ В УПРАВЛЕНИИ */
+    .control-box input[type="radio"] { display: none; }
+    
+    /* Мягкое золотое выделение выбранного действия */
+    .control-box label:has(input:checked) { 
+        background: rgba(209, 165, 5, 0.25); 
+        border-color: #D1A505; 
+        color: #FFD500; 
+        font-weight: 700; 
+        box-shadow: inset 0 0 8px rgba(209, 165, 5, 0.2); 
+    }
+    
+    .control-box label.disabled { opacity: 0.5; cursor: not-allowed; background: #06362D; color: #155332; border-color: #06362D;}
+
+    .action-buttons { margin-top: auto; }
+    .start-sticky-header {
+        position: sticky;
+        top: -15px; /* Прилипает к самому верху контейнера */
+        z-index: 1000;
+        background: #155332; /* Сливается с фоном панели */
+        padding: 15px 0;
+        margin-bottom: 15px;
+        border-bottom: 2px solid #D1A505;
+        box-shadow: 0 10px 15px -5px rgba(0,0,0,0.4);
+    }
+    #btn-start {
+        background: #FFD500; color: #06362D; border: 3px solid #D1A505; 
+        font-size: 20px; margin: 0 auto; max-width: 300px;
+    }
+    #btn-start:hover { background: #D1A505; border-color: #DEE2B1; }
+
+    /* Мелкие экраны (Телефоны) - Адаптация скролла и UX */
+    @media (max-width: 767px) {
+        body { padding: 4px; padding-bottom: 80px; /* Даем отступ снизу, чтобы липкая кнопка ничего не перекрывала */ }
+        .container { padding: 10px; border-width: 1px; }
+        
+        /* Исправляем горизонтальный скролл на стартовом экране */
+        .start-options { grid-template-columns: 1fr; gap: 8px; }
+        
+        .avatar { width: 70px; height: 70px; } 
+        h1 { font-size: 20px; }
+        .stats-panel { padding: 10px; }
+        
+        /* Решаем проблему "ловушки скролла" - делаем лог чуть компактнее */
+        #log-area { 
+            height: 25vh; /* Используем меньше высоты экрана на телефонах */
+            min-height: 150px; 
+            font-size: 12px; 
+            padding: 8px;
+        }
+        
+        .control-box label { padding: 8px 10px; font-size: 12.5px; }
+        
+        /* Делаем блок кнопок неуязвимым для багов Iframe */
+        .action-buttons { 
+            position: sticky; 
+            bottom: -10px; /* Прилипает к низу */
+            background: #155332; 
+            padding: 15px 10px 10px 10px; 
+            border-top: 2px solid #D1A505;
+            box-shadow: 0 -10px 15px -5px rgba(0,0,0,0.5);
+            z-index: 1000;
+            display: flex; flex-direction: column; gap: 5px;
+            margin: 10px -10px -10px -10px; 
+        }
+        
+        /* Кнопка боя на телефоне будет крупнее и удобнее для пальца */
+        #btn-fight { margin: 0; padding: 14px; font-size: 17px; }
+        #btn-next, #btn-switch { margin: 0; padding: 10px; font-size: 14px; }
+    }
+    /* --- Улучшение читаемости имен Игрока и Врага --- */
+    #p-name {
+        color: #76D7C4 !important; /* Яркий бирюзовый/мятный оттенок */
+        font-weight: 700;
+        font-size: 15.5px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.9); /* Плотная тень, чтобы отделить от фона */
+        margin-bottom: 4px;
+    }
+    
+    #b-name {
+        color: #F1948A !important; /* Светлый кораллово-красный оттенок */
+        font-weight: 700;
+        font-size: 15.5px;
+        letter-spacing: 0.5px;
+        text-shadow: 0 2px 5px rgba(0,0,0,0.9); /* Плотная тень */
+        margin-bottom: 4px;
+    }
+    /* --- Всплывающая подсказка для статусов (Toast) --- */
+    #toast {
+        position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+        background: #06362D; border: 2px solid #FFD500;
+        color: #DEE2B1; padding: 12px 20px; border-radius: 8px;
+        font-size: 14px; font-weight: 600; z-index: 9999;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.8);
+        opacity: 0; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
+        pointer-events: none; text-align: center; width: max-content; max-width: 90%;
+    }
+    #toast.show { opacity: 1; top: 20px; }
+</style>
+</head>
+<body>
+<div id="toast"></div>
+<div class="container">
+    <div id="start-screen" class="active">
+        
+        <div class="start-sticky-header">
+            <button id="btn-start" onclick="startGame()">⚔️ В БОЙ! ⚔️</button>
+        </div>
+
+        <div class="start-options">
+            <label class="class-card">
+                <input type="radio" name="f_class" value="rogue" checked>
+                <div class="class-header">🗡️ Разбойник (60 HP)</div>
+                <div class="class-desc">22% уворот, 30% двойной удар (50% урона, пробивает блока).</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Порошок (4 Энергии):</b> 3 урона + 65% шанс повесить слепоту и снять баффы врага.<br>
+                    <b>Подсечка (4 Энергии):</b> 3 урона + Уязвимость (+15% получаемого урона на 2 хода).
+                </div></div>
+            </label>
+           <label class="class-card">
+                <input type="radio" name="f_class" value="berserker">
+                <div class="class-header">🪓 Берсерк (60 HP)</div>
+                <div class="class-desc">+1 урон за 12 потерянных HP. Контрудар (25% шанс излечить 3-4 ХП и повесить Кровотечение).</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Рваная рана (4 Энергии):</b> Обычный урон + Кровотечение (2 ур / 3 хода).<br>
+                    <b>Казнь (5 Энергии):</b> Платит 3 HP. 3 урона + 1 доп. урон за каждые 5 потерянных HP.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="mage">
+                <div class="class-header">🔮 Маг (60 HP)</div>
+                <div class="class-desc">+3 урона посохом, если на враге есть любой дебафф.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Горящий лёд (4 Маны):</b> 3-5 маг. урона. Вешает Горение (1 ур/2 хода) или Лед (50% промах на 2 хода).<br>
+                    <b>Щит маны (4 Маны):</b> 1 ход отражает 50% любого урона и <b>все</b> негативные эффекты обратно во врага.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="paladin">
+                <div class="class-header">🛡️ Паладин (60 HP)</div>
+                <div class="class-desc">Удачный блок лечит 1-2 HP. 25% шанс ударить магией света (+3 урона) при атаке.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Карающий удар (5 Маны):</b> 3-4 физ. и 2-3 маг. урона. Физику можно заблокировать, магию — нет.<br>
+                    <b>Святая Клятва (4 Маны):</b> На 2 хода ваши успешные блоки наносят 3 маг. урона атакующему.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="crossbowman">
+                <div class="class-header">🏹 Арбалетчик (60 HP)</div>
+                <div class="class-desc">25% шанс прострелить колено (-2 урона врагу). Выстрелы в блок всегда наносят минимум 2 урона.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Lucky Strike (4 Энергии):</b> 2 урона в блок, либо от 2 до 14 урона по открытой цели.<br>
+                    <b>Зажигательный болт (4 Энергии):</b> 3-5 урона + взрыв вешает Горение (1 ур/2 хода).
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="plague_doctor">
+                <div class="class-header">🧪 Чумной доктор (60 HP)</div>
+                <div class="class-desc">Успешный удар лечит на 1 (по отравленному 2-3) и вешает Яд. 25% отравить атакующего.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Катализатор (5 Маны):</b> 2-3 маг. урона + удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода).<br>
+                    <b>Миазмы (4 Маны):</b> На 2 хода: урон врага снижен на 2, а ваши атаки с шансом 50% игнорируют блок.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="warlock">
+                <div class="class-header">💀 Чернокнижник (60 HP)</div>
+                <div class="class-desc">Атака дает +1 к Проклятию. Лечится на 1 HP в конце хода, если враг проклят.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Сглаз (4 Маны):</b> 3-4 маг. урона + добавляет 2 урона к Проклятию (обновляет таймер до 2 ходов).<br>
+                    <b>Броня Неназываемого (5 Маны):</b> 1 ход не атакует, но получает на 65% меньше урона, а лечение от Проклятия возрастает до 3 HP.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="shieldbearer">
+                <div class="class-header">🧱 Щитоносец (60 HP)</div>
+                <div class="class-desc">-1 от любого урона. 25% шанс блока на 3-4 урона.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Удар щитом (5 Энергии):</b> 4-6 урона + Истощение (реген маны/энергии снижен, мин. 1 в ход) на 2 хода.<br>
+                    <b>Пригвоздить (5 Энергии):</b> 3-5 урона + Раскол (блок врага пробивается с шансом 50%) на 2 хода.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="beekeeper">
+                <div class="class-header">🐝 Пчеловод (60 HP)</div>
+                <div class="class-desc">Атаки копят Рой (до 3), который атакует случайную зону каждый ход. При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Залепи дуло (4 Энергии):</b> 2-3 урона + Липкие руки (15% шанс промаха врага на 2 хода).<br>
+                    <b>Медок (5 Энергии):</b> Восстанавливает 6 HP. Размер Роя сбрасывается до 1.
+                </div></div>
+            </label>
+            <label class="class-card">
+                <input type="radio" name="f_class" value="samurai">
+                <div class="class-header">👺 Самурай (60 HP)</div>
+                <div class="class-desc">25% парировать любую атаку (-4 урона). Копит +2 урона за промах или удар в блок врага.</div>
+                <div class="skills-reveal"><div class="skills-inner">
+                    <b>Заточка меча (4 Энергии):</b> Следующий удар получает +5 урона и наполовину прорезает чужой блок.<br>
+                    <b>Стойка тени (3 Энергии):</b> Восстанавливает 3 энергии. Ваш следующий удар нельзя заблокировать.
+                </div></div>
+            </label>
+        </div>
+        
+    </div>
+
+    <div id="combat-screen">
+        <div class="combat-layout">
+            <div class="combat-left">
+                <div class="stats-panel">
+                    <div class="player-stats">
+                        <img id="p-avatar" class="avatar" src="" alt="Player">
+                        <div id="p-name" style="color:#2c3e50">Игрок</div>
+                        <div class="bar-container"><div class="bar-text" id="p-hp-text">50/50</div><div id="p-hp-bar" class="hp-bar" style="width: 100%;"></div></div>
+                        <div class="bar-container"><div class="bar-text" id="p-res-text">10/10</div><div id="p-res-bar" class="res-energy" style="width: 100%;"></div></div>
+                        <div id="p-status" class="status-bar"></div>
+                    </div>
+                    <div><h2 style="margin-top: 50px; font-size: 28px; color: #777;">VS</h2></div>
+                    <div class="bot-stats">
+                        <img id="b-avatar" class="avatar" src="" alt="Bot">
+                        <div id="b-name" style="color:#8b0000">Вражина</div>
+                        <div class="bar-container"><div class="bar-text" id="b-hp-text">50/50</div><div id="b-hp-bar" class="hp-bar" style="width: 100%;"></div></div>
+                        <div class="bar-container"><div class="bar-text" id="b-res-text">10/10</div><div id="b-res-bar" class="res-energy" style="width: 100%;"></div></div>
+                        <div id="b-status" class="status-bar"></div>
+                    </div>
+                </div>
+                <div id="log-area"></div>
+            </div>
+            
+            <div class="combat-right">
+                <div class="controls">
+                    <div class="control-box">
+                        <h3>⚔️ Атака</h3>
+                        <div class="options-grid">
+                            <label><input type="radio" name="attack" value="1" checked> Голова</label>
+                            <label><input type="radio" name="attack" value="2"> Грудь</label>
+                            <label><input type="radio" name="attack" value="3"> Живот</label>
+                            <label><input type="radio" name="attack" value="4"> Ноги</label>
+                        </div>
+                    </div>
+                    
+                    <div class="control-box">
+                        <h3>🛡️ Защита</h3>
+                        <div class="options-grid">
+                            <label><input type="radio" name="block" value="1,2" checked> Блок: Голова и грудь</label>
+                            <label><input type="radio" name="block" value="2,3"> Блок: Грудь и живот</label>
+                            <label><input type="radio" name="block" value="3,4"> Блок: Живот и ноги</label>
+                            <label><input type="radio" name="block" value="1,4"> Блок: Голова и ноги</label>
+                            <label class="full-width"><input type="radio" name="block" value="meditation"> 🧘 Медитация (Без блока, +4 ресурса)</label>
+                        </div>
+                    </div>
+                    
+                    <div class="control-box">
+                        <h3>✨ Навыки и Предметы</h3>
+                        <div class="options-column" id="skills-container"></div>
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="btn-fight" onclick="playRound()">⚔️ СДЕЛАТЬ ХОД ⚔️</button>
+                    <button id="btn-next" onclick="startNewBattle()" style="display:none;">🔄 НОВЫЙ БОЙ</button>
+                    <button id="btn-switch" onclick="goToStartScreen()">🚪 Сменить класс</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ZONES = {1: "Голову", 2: "Грудь", 3: "Живот", 4: "Ноги"};
+    
+    const C_DATA = {
+        rogue: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
+            {id: "blind_powder", name: "Ослепляющий порошок", cost: 4, type: "skill", desc: "Наносит 3 урона. 65% шанс ослепить врага (100% промах физ. атакой) и снять баффы."},
+            {id: "sweep", name: "Подсечка (Уязвимость)", cost: 4, type: "skill", desc: "Наносит 3 урона. Накладывает Уязвимость (+15% получаемого урона) на 2 хода."}
+        ]},
+        berserker: { hp: 60, res: "energy", minD: 2, maxD: 7, skills: [
+            {id: "torn_wound", name: "Рваная рана", cost: 4, type: "skill", desc: "Обычный удар и вешает Кровотечение (2 урона на 3 хода)."},
+            {id: "execution", name: "Казнь", cost: 5, type: "skill", desc: "Платит 3 HP. Наносит 3 базового урона сквозь блок + 1 доп. урон за каждые 5 потерянных вами HP."}
+        ]},
+        mage: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
+            {id: "burning_ice", name: "Горящий лёд", cost: 4, type: "skill", desc: "3-5 маг. урона + шанс повесить Горение (1 ур/2 хода) ИЛИ Лед (50% шанс промаха на 2 хода)."},
+            {id: "mana_shield", name: "Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 50% получаемого урона и любые статусные эффекты обратно во врага."}
+        ]},
+        paladin: { hp: 60, res: "mana", minD: 4, maxD: 6, skills: [
+            {id: "punish", name: "Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Если враг ставит блок, он поглотит только физическую часть."},
+            {id: "oath", name: "Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
+        ]},
+        crossbowman: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
+            {id: "lucky_strike", name: "Lucky Strike", cost: 4, type: "skill", desc: "2 урона в блок, либо от 2 до 14 урона по открытой цели."},
+            {id: "incendiary", name: "Зажигательный болт", cost: 4, type: "skill", desc: "3-5 урона + взрыв вешает Горение (1 урон на 2 хода)."}
+        ]},
+        plague_doctor: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
+            {id: "catalyst", name: "Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона и удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода)."},
+            {id: "miasma", name: "Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 2, а ваши атаки получают 50% шанс проигнорировать блок."}
+        ]},
+        warlock: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
+            {id: "hex", name: "Сглаз", cost: 4, type: "skill", desc: "Наносит 3-4 маг. урона. Добавляет +2 урона к Проклятию на враге (на 2 хода)."},
+            {id: "dark_armor", name: "Броня Неназываемого", cost: 5, type: "skill", desc: "На 1 ход вы не атакуете, но получаете на 65% меньше урона, а лечение от проклятия возрастает до 3 HP."}
+        ]},
+        shieldbearer: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
+            {id: "shield_bash", name: "Удар щитом", cost: 5, type: "skill", desc: "Наносит 4-6 урона. Истощение: снижает регенерацию ресурсов врага на 100% на 2 хода (минимум 1)."},
+            {id: "pin", name: "Пригвоздить", cost: 5, type: "skill", desc: "Наносит 3-5 урона. Раскол: блоки врага проваливаются с шансом 50% на 2 хода."}
+        ]},
+        beekeeper: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
+            {id: "propolis", name: "Залепи дуло", cost: 4, type: "skill", desc: "Наносит 2-3 урона и вешает Липкие руки (15% шанс промаха) на 2 хода."},
+            {id: "honey", name: "Медок", cost: 5, type: "skill", desc: "Восстанавливает 6 HP. Размер Роя сбрасывается до 1."}
+        ]},
+        samurai: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
+            {id: "sharpen", name: "Заточка меча", cost: 4, type: "skill", desc: "Следующий удар получает +5 урона и наполовину прорезает чужой блок."},
+            {id: "shadow_stance", name: "Стойка тени", cost: 3, type: "skill", desc: "Восстанавливает 3 энергии. Ваш следующий удар становится 100% неблокируемым."}
+        ]}
+    };
+
+    const NAMES = {
+        male: { "rogue": "🗡️ Разбойник", "berserker": "🪓 Берсерк", "mage": "🔮 Маг", "paladin": "🛡️ Паладин", "crossbowman": "🏹 Арбалетчик", "plague_doctor": "🧪 Чумной доктор", "warlock": "💀 Чернокнижник", "shieldbearer": "🧱 Щитоносец", "beekeeper": "🐝 Пчеловод", "samurai": "👺 Самурай" },
+        female: { "rogue": "🗡️ Разбойница", "berserker": "🪓 Воительница", "mage": "🔮 Волшебница", "paladin": "🛡️ Паладинша", "crossbowman": "🏹 Арбалетчица", "plague_doctor": "🧪 Чумной доктор", "warlock": "💀 Чернокнижница", "shieldbearer": "🧱 Дева-Щита", "beekeeper": "🐝 Пчеловодка", "samurai": "👺 Самурай-сан" }
+    };
+
+    const AVATARS = {
+        male: { "rogue": "https://i.postimg.cc/t49wbYrW/IMG-6248.png", "berserker": "https://i.postimg.cc/qvpSrzmj/IMG-6249.png", "mage": "https://i.postimg.cc/9QcK2rxx/IMG-6250.png", "paladin": "https://i.postimg.cc/SsHQ4hFC/paladin-m.png", "crossbowman": "https://i.postimg.cc/85xkGSQd/crossbow-m.png", "plague_doctor": "https://i.postimg.cc/fW0TKJmP/plague-doctor-m.png", "warlock": "https://i.postimg.cc/tT3T2qgp/Gemini_Generated_Image_urxn58urxn58urxn_(4).png", "shieldbearer": "https://i.postimg.cc/jdsW37N8/Gemini_Generated_Image_mjgb71mjgb71mjgb.png", "beekeeper": "https://i.postimg.cc/3RXRn8wr/Gemini_Generated_Image_urxn58urxn58urxn_(2).png", "samurai": "https://i.postimg.cc/ncczGtft/Gemini_Generated_Image_urxn58urxn58urxn.png" },
+        female: { "rogue": "https://i.postimg.cc/SQBbBQFd/IMG-6251.png", "berserker": "https://i.postimg.cc/ryB2ByXH/IMG-6252.png", "mage": "https://i.postimg.cc/1Rk1kRhj/IMG-6253.png", "paladin": "https://i.postimg.cc/76jP4k82/paladin-f.png", "crossbowman": "https://i.postimg.cc/wvP9F4SR/crossbow-f.png", "plague_doctor": "https://i.postimg.cc/JnS78LVy/plague-doctor-f.png", "warlock": "https://i.postimg.cc/PfMJD5cy/Gemini_Generated_Image_urxn58urxn58urxn_(5).png", "shieldbearer": "https://i.postimg.cc/m22DyGWW/Gemini_Generated_Image_urxn58urxn58urxn_(6).png", "beekeeper": "https://i.postimg.cc/QCjMz2BL/Gemini_Generated_Image_urxn58urxn58urxn_(3).png", "samurai": "https://i.postimg.cc/KjmYW6Kh/Gemini_Generated_Image_urxn58urxn58urxn_(1).png" }
+    };
+
+    class Fighter {
+        constructor(name, fClass, gender, isBot) {
+            let data = C_DATA[fClass];
+            this.name = name;
+            this.fClass = fClass;
+            this.gender = gender;
+            this.isBot = isBot;
+            
+            this.maxHp = data.hp;
+            this.hp = data.hp;
+            
+            this.maxRes = fClass === "mage" ? 14 : 12;
+            
+            this.res = this.maxRes;
+            this.resType = data.res;
+            
+            this.minDmg = data.minD;
+            this.maxDmg = data.maxD;
+            this.hasPotion = true;
+            this.cooldowns = {}; 
+            
+            this.critChance = 0;
+            this.magicCritChance = fClass === "mage" ? 0.15 : 0;
+            this.dodgeChance = fClass === "rogue" ? 0.22 : 0;
+           this.effects = {
+                burn: {t:0, a:0}, poison: {t:0, a:0}, bleed: {t:0, a:0}, curse: {t:0, a:0}, 
+                ice: {t:0}, blind: {t:0}, thorns: {t:0}, regen: {t:0, a:0}, 
+                atkDebuff: {t:0, a:0}, dmgDebuff: {t:0, a:0}, sharpen: {c:0}, shield: {t:0}, vuln: {t:0, a:0},
+                exhaustion: {t:0, a:0}, sunder: {t:0, a:0}, sticky: {t:0, a:0}, unblockable: {t:0},
+                pacified: {t:0}, miasma: {t:0}
+            };
+            this.samuraiBonus = 0;
+            this.swarm = 0; // Накопление роя
+            this.dealtPhysDmgThisTurn = false;
+        }
+
+        get logName() { return `${this.name} [${this.hp}/${this.maxHp}]`; }
+        isAlive() { return this.hp > 0; }
+        
+        takeDamage(amount) { this.hp = Math.max(0, this.hp - amount); }
+        heal(amount) { this.hp = Math.min(this.maxHp, this.hp + amount); }
+        
+        addRes(amount) { 
+            if (amount > 0 && this.effects.exhaustion.t > 0) {
+                let reduced = amount * (1 - this.effects.exhaustion.a); // Вычитаем процент
+                amount = Math.max(1, Math.round(reduced)); // Не меньше 1
+            }
+            this.res = Math.min(this.maxRes, this.res + amount); 
+        }
+        
+        hasAnyDebuff() {
+            return this.effects.burn.t > 0 || this.effects.poison.t > 0 || this.effects.bleed.t > 0 || 
+                   this.effects.curse.t > 0 || this.effects.ice.t > 0 || this.effects.dmgDebuff.t > 0 || 
+                   this.effects.atkDebuff.t > 0 || this.effects.blind.t > 0 || this.effects.vuln.t > 0 ||
+                   this.effects.exhaustion.t > 0 || this.effects.sunder.t > 0 ||
+                   this.effects.sticky.t > 0;
+        }
+    }
+
+    let player, bot, roundNum, matchGender;
+    
+    function getRnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+    function getRadioVal(name, fb="1") { let el = document.querySelector(`input[name="${name}"]:checked`); return el ? el.value : fb; }
+    function logMsg(msg, tag="system") { 
+        let log = document.getElementById("log-area"); 
+        let div = document.createElement("div"); div.className = `log-msg ${tag}`; div.innerHTML = msg; 
+        log.appendChild(div); log.scrollTop = log.scrollHeight; 
+    }
+
+    let toastTimeout;
+    function showInfo(text) {
+        let t = document.getElementById("toast");
+        t.innerText = text;
+        t.classList.add("show");
+        clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => t.classList.remove("show"), 2500); // прячем через 2.5 секунды
+    }
+
+   function renderStatuses(f, containerId) {
+        let html = "";
+        let e = f.effects;
+        
+        // Эта переменная автоматически делает статус кликабельным на iPad и ПК
+        let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
+        
+        if(e.burn.t > 0) html += `<span class="status-badge sb-burn" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>🔥 ${e.burn.t}</span>`;
+        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>🟢 ${e.poison.t}</span>`;
+        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
+        if(e.curse.t > 0) html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
+        if(e.ice.t > 0) html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
+        if(e.blind.t > 0) html += `<span class="status-badge sb-blind" title="Ослепление: 100% промах физ. атакой." ${oc}>🌫️ 1</span>`;
+        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>📉 ${e.dmgDebuff.t}</span>`;
+        if(e.atkDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Сила атаки снижена на ${e.atkDebuff.a}. Ходов: ${e.atkDebuff.t}" ${oc}>🤕 ${e.atkDebuff.t}</span>`;
+        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
+        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>✨ ${e.thorns.t}</span>`;
+        if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
+        if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
+        if(e.shield.t > 0) html += `<span class="status-badge sb-shield" title="Щит Маны: отражает 50% урона." ${oc}>🛡️</span>`;
+        if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
+        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🔋 ${e.exhaustion.t}</span>`;
+        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
+        if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
+        if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
+        if(e.unblockable.t > 0) html += `<span class="status-badge sb-buff" title="Стойка тени: Следующий удар неблокируемый." ${oc}>👺 1</span>`;
+        if(e.pacified.t > 0) html += `<span class="status-badge sb-shield" style="background:#4a235a;" title="Броня Неназываемого: Атака пропущена, получаемый урон снижен на 65%." ${oc}>🌑 1</span>`;
+        if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
+        
+        document.getElementById(containerId).innerHTML = html;
+    }
+
+    function updateStats() {
+        document.getElementById("p-name").innerText = `Игрок (${NAMES[matchGender][player.fClass]})`;
+        document.getElementById("p-hp-text").innerText = `${player.hp}/${player.maxHp} HP`;
+        document.getElementById("p-hp-bar").style.width = `${(player.hp/player.maxHp)*100}%`;
+        document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
+        document.getElementById("p-res-bar").className = player.resType==="energy" ? "res-energy" : "res-mana";
+        document.getElementById("p-res-bar").style.width = `${(player.res/player.maxRes)*100}%`;
+        document.getElementById("p-avatar").src = AVATARS[matchGender][player.fClass];
+        renderStatuses(player, "p-status");
+
+        document.getElementById("b-name").innerText = `Вражина (${NAMES[matchGender][bot.fClass]})`;
+        document.getElementById("b-hp-text").innerText = `${bot.hp}/${bot.maxHp} HP`;
+        document.getElementById("b-hp-bar").style.width = `${(bot.hp/bot.maxHp)*100}%`;
+        document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
+        document.getElementById("b-res-bar").className = bot.resType==="energy" ? "res-energy" : "res-mana";
+        document.getElementById("b-res-bar").style.width = `${(bot.res/bot.maxRes)*100}%`;
+        document.getElementById("b-avatar").src = AVATARS[matchGender][bot.fClass];
+        renderStatuses(bot, "b-status");
+
+        let html = `<label style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; align-items: center;">
+                <input type="radio" name="spell" value="none" checked> 
+                <span style="font-weight: bold;">⚔️ Базовая атака</span>
+            </div>
+            <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
+                Обычная атака без затрат ресурсов.
+            </div>
+        </label>`;
+
+        if(player.hasPotion) {
+            html += `<label style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; align-items: center;">
+                    <input type="radio" name="spell" value="potion"> 
+                    <span style="font-weight: bold;">🧪 Зелье здоровья (+15 HP) [1 шт]</span>
+                </div>
+                <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
+                    Мгновенно восстанавливает 15 здоровья. Не тратит ход.
+                </div>
+            </label>`;
+        }
+
+        C_DATA[player.fClass].skills.forEach(s => {
+            let cd = player.cooldowns[s.id] || 0;
+            let dis = (player.res < s.cost || cd > 0) ? "disabled" : "";
+            let cdTxt = cd > 0 ? ` <span style="color:#e74c3c; margin-left: 6px;">⏳ [КД: ${cd}]</span>` : "";
+            
+            html += `<label class="${dis}" style="flex-direction: column; align-items: flex-start;">
+                <div style="display: flex; align-items: center;">
+                    <input type="radio" name="spell" value="${s.id}" ${dis?'disabled':''}> 
+                    <span style="font-weight: bold;">✨ ${s.name} (${s.cost} ${player.resType==='energy'?'Эн.':'Ман.'})</span>${cdTxt}
+                </div>
+                <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
+                    ${s.desc || ''}
+                </div>
+            </label>`;
+        });
+        
+        document.getElementById("skills-container").innerHTML = html;
+    }
+
+    function applyMitigation(def, dmg, isDot, isMagic, att = null) {
+        let logTxt = "", finalDmg = dmg;
+        if (def.fClass === "samurai" && !isDot && finalDmg > 0 && Math.random() < 0.25) {
+            finalDmg = Math.max(1, finalDmg - 4); 
+            logTxt += ` 👺 Парирование (-4)!`;
+        }
+        if (def.fClass === "shieldbearer") {
+            finalDmg = Math.max(isDot ? 1 : 1, finalDmg - 1);
+            if (!isDot && finalDmg > 0 && Math.random() < 0.25) { 
+                let blockAmt = getRnd(3, 4); 
+                finalDmg = Math.max(1, finalDmg - blockAmt); logTxt += ` 🧱 Блок щитом (-${blockAmt})!`; 
+            }
+        }
+        if (def.fClass === "beekeeper" && finalDmg > 0 && Math.random() < 0.25) {
+            finalDmg = Math.max(isDot ? 0 : 1, finalDmg - 2);
+            logTxt += ` 🍯 Воск (-2)!`;
+            if (att && att !== def) {
+                applyStatus(def, att, "sticky", 2, 0.15, false); logTxt += ` Враг в меду!`;
+            }
+        }
+        if (def.fClass === "warlock" && def.effects.pacified.t > 0 && !isDot && finalDmg > 0) {
+            finalDmg = Math.max(1, Math.round(finalDmg * 0.35)); // Оставляем 35% урона (срез 65%)
+            logTxt += ` 🌑 Броня Неназываемого (-65%)!`;
+        }
+        return { finalDmg, logTxt };
+    }
+    function applyStatus(caster, target, type, t, a = 0, isDot = false) {
+        let realTarget = target;
+        let msg = "";
+        // Проверяем Щит Маны
+        if (caster !== target && target.effects.shield.t > 0) {
+            realTarget = caster;
+            msg = " 🛡️ Щит маны отразил эффект!";
+        }
+        
+        if (isDot) {
+            if (realTarget.effects[type].t > 0) {
+                realTarget.effects[type].a += a;
+                realTarget.effects[type].t = Math.max(realTarget.effects[type].t, t);
+            } else {
+                realTarget.effects[type] = { t: t, a: a };
+            }
+        } else {
+            realTarget.effects[type] = { t: t, a: a };
+        }
+        return msg;
+    }
+    function applyVuln(target, dmg) {
+        return target.effects.vuln.t > 0 ? Math.round(dmg * (1 + target.effects.vuln.a)) : dmg;
+    }
+
+    function dealSkillDamage(caster, target, baseDmg, isMagic, isDot = false) {
+        let mit = applyMitigation(target, baseDmg, isDot, isMagic, caster);
+        let finalDmg = applyVuln(target, mit.finalDmg);
+        let reflectMsg = "";
+        
+        if (target.effects.shield.t > 0 && !isDot) {
+            let reflect = Math.ceil(finalDmg / 2);
+            finalDmg = Math.floor(finalDmg / 2);
+            target.takeDamage(finalDmg);
+            caster.takeDamage(reflect);
+            reflectMsg = ` 🛡️ Щит маны отражает ${reflect} урона!`;
+        } else {
+            target.takeDamage(finalDmg);
+        }
+        return { dmg: finalDmg, msg: mit.logTxt + reflectMsg };
+    }
+
+    function calculateStrike(att, def, aZone, bZones, fixedDmg = null, ignoreBlock = false, isHalfDmg = false, isSwarm = false) {
+        
+        if(att.effects.pacified.t > 0) {
+            return [`🌑 ${att.logName} укрыт Броней Неназываемого и не совершает атаку.`, "system"];
+        }
+        let zoneText = `<u>${ZONES[aZone].toLowerCase()}</u>`;
+        let verb = att.fClass==="rogue"?"вонзает кинжал в":att.fClass==="berserker"?"рубит в":att.fClass==="paladin"?"бьет молотом в":att.fClass==="crossbowman"?"стреляет в":att.fClass==="plague_doctor"?"режет скальпелем в":att.fClass==="shieldbearer"?"бьет щитом в":att.fClass==="samurai"?"рубит катаной в":"бьет посохом в";
+        if (isSwarm) verb = "напускает рой на";
+        if(att.effects.sticky.t > 0 && Math.random() < att.effects.sticky.a) {
+            return [`🍯 Липкие руки мешают! ${att.logName} промахивается!`, "dodge"];
+        }
+        if(att.effects.blind.t > 0) {
+            att.effects.blind.t = 0; 
+            return [`🌫️ Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"];
+        }
+        if(att.effects.ice.t > 0 && Math.random() < 0.5) {
+            return [`🧊 ${att.logName} поскальзывается на льду! Промах!`, "dodge"];
+        }
+
+        let isBlocked = bZones.includes(aZone.toString());
+        let pierceMsg = "";
+        
+        // Логика Раскола (от Щитоносца)
+        if (isBlocked && def.effects.sunder.t > 0 && Math.random() < def.effects.sunder.a) {
+            isBlocked = false; pierceMsg = " 💔 Раскол пробивает блок!";
+        }
+
+        // Логика Стойки тени (100% пробитие)
+        if (att.effects.unblockable && att.effects.unblockable.t > 0) {
+            isBlocked = false;
+            pierceMsg = " 👺 Удар из тени игнорирует блок!";
+            att.effects.unblockable.t = 0; // Снимаем заряд
+        }
+
+        // Логика Миазмов (50% шанс пробить)
+        if (isBlocked && att.fClass === "plague_doctor" && att.effects.miasma.t > 0 && Math.random() < 0.5) {
+            isBlocked = false;
+            pierceMsg = " 🧪 Токсичные испарения обходят блок!";
+        }
+
+        if(isBlocked && !ignoreBlock) {
+            if (att.fClass === "crossbowman" && fixedDmg === null) {
+                fixedDmg = 2; 
+                pierceMsg = " 💥 Тяжелый арбалетный болт пробивает даже блок!";
+            } else if (att.fClass === "samurai" && att.effects.sharpen.c > 0) {
+                isHalfDmg = true; // Режем урон пополам, но пропускаем удар
+                pierceMsg = " 🔪 Заточенный клинок прорезает блок наполовину!";
+            } else {
+                let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
+                if (def.fClass === "paladin") {
+                    let healAmt = getRnd(1, 2);
+                    def.heal(healAmt); blockMsg += ` ✨ Свет лечит на ${healAmt} HP!`;
+                    if(def.effects.thorns.t > 0) {
+                        let r = dealSkillDamage(def, att, 3, true); 
+                        blockMsg += ` ⚡ Святые шипы бьют атакующего (${r.dmg} ур)!${r.msg}`;
+                    }
+                }
+                return [blockMsg, "block"];
+            }
+        } else if (isBlocked && ignoreBlock) {
+            pierceMsg = " 💥 Блок обойден!";
+        }
+
+        if(def.fClass === "rogue" && def.effects.blind.t===0 && Math.random() < def.dodgeChance) {
+            def.addRes(1); return [`💨 ${def.logName} перекатом уходит от атаки! (+1 Энергия)`, "dodge"];
+        }
+
+        let gainMsg = "";
+        if (!isSwarm) {
+            att.dealtPhysDmgThisTurn = true;
+            att.addRes(1); 
+            gainMsg = " ⚡ (+1 рес.)";
+        }
+
+        let dmg = fixedDmg !== null ? fixedDmg : getRnd(att.minDmg, att.maxDmg);
+        
+        if (att.fClass === "mage" && def.hasAnyDebuff()) { dmg += 3; verb = "бьет светящимся посохом в"; }
+        if (att.fClass === "samurai" && fixedDmg === null) {
+            dmg += att.samuraiBonus;
+            if (att.effects.sharpen.c > 0) { 
+                dmg += 5; 
+                att.effects.sharpen.c--; 
+                gainMsg += " 🔪 Смертельная сталь (+5)!"; 
+            }
+        }
+        if (att.fClass === "berserker" && fixedDmg === null) {
+            let missing = att.maxHp - att.hp;
+            let fury = Math.floor(missing / 12);
+            if(fury > 0) { dmg += fury; gainMsg += ` 😡 Ярость (+${fury})!`; }
+        }
+
+        if(att.effects.dmgDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.dmgDebuff.a);
+        if(att.effects.atkDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.atkDebuff.a);
+
+        let isCrit = att.fClass === "berserker" && Math.random() < att.critChance;
+        if(isCrit) dmg *= 2;
+        if(isHalfDmg) dmg = Math.max(1, Math.floor(dmg / 2));
+        
+        let mit = applyMitigation(def, dmg, false, false, att);
+        let finalDmg = mit.finalDmg;
+
+        finalDmg = applyVuln(def, finalDmg);
+        
+        // --- ВСТАВИТЬ РОСТ РОЯ СЮДА ---
+        if (att.fClass === "beekeeper" && fixedDmg === null && finalDmg > 0) {
+            att.swarm = Math.min(3, att.swarm + 1);
+            gainMsg += ` 🐝 Рой растет (${att.swarm})!`;
+        }
+        // ------------------------------
+        
+        let reflectMsg = "";
+        if (def.effects.shield.t > 0) {
+            let reflect = Math.ceil(finalDmg / 2);
+            finalDmg = Math.floor(finalDmg / 2);
+            def.takeDamage(finalDmg);
+            att.takeDamage(reflect);
+            reflectMsg = ` 🛡️ Щит маны отражает ${reflect} урона!`;
+        } else {
+            def.takeDamage(finalDmg);
+        }
+        
+        let msg = isCrit ? `💥 КРИТ! ${att.logName} пробивает ${zoneText}. Урон: ${finalDmg}!${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}` 
+                         : `⚔️ ${att.logName} ${verb} ${zoneText}. Урон: ${finalDmg}.${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}`;
+
+        if(att.fClass === "paladin" && Math.random() < 0.25) {
+            let r = dealSkillDamage(att, def, 3, true);
+            msg += ` ☀️ Вспышка Света (${r.dmg} ур)!${r.msg}`;
+        }
+        if (att.fClass === "plague_doctor" && fixedDmg === null) {
+            let healAmt = def.effects.poison.t > 0 ? getRnd(2, 3) : 1;
+            att.heal(healAmt);
+            let sMsg = applyStatus(att, def, "poison", 2, 1, true); 
+            msg += ` 🩸 Вампиризм (+${healAmt} HP)! 🟢 Яд усилен.${sMsg}`;
+        }
+        if (att.fClass === "crossbowman" && Math.random() < 0.25) {
+            msg += applyStatus(att, def, "dmgDebuff", 2, 2); msg += ` 🦵 Прострел ноги (-2 урон врага)!`;
+        }
+        if (att.fClass === "warlock" && fixedDmg === null) {
+            let sMsg = applyStatus(att, def, "curse", 2, 1, true); 
+            msg += ` 💀 Проклятие усилено!${sMsg}`;
+        }
+
+        // Контрудар Берсерка (Лечение и кровь)
+        if (def.fClass === "berserker" && def.isAlive() && finalDmg > 0 && fixedDmg === null && Math.random() < 0.25) {
+            let h = getRnd(3, 4);
+            def.heal(h);
+            let sMsg = applyStatus(def, att, "bleed", 2, 1, true); 
+            msg += ` 🪓 Кровавый контрудар! ${def.name} лечится на ${h} ХП и пускает врагу кровь!${sMsg}`;
+        }
+        
+        // Ядовитая кровь Доктора
+        if (def.fClass === "plague_doctor" && def.isAlive() && finalDmg > 0 && fixedDmg === null && Math.random() < 0.25) {
+            let sMsg = applyStatus(def, att, "poison", 2, 1, true);
+            msg += ` 🧪 Ядовитая кровь! Атакующий отравлен.${sMsg}`;
+        }
+        return [msg, isCrit?"crit":"hit"];
+    }
+
+    function processSkill(caster, target, skillId, aZone, bZones) {
+        let isCrit = caster.fClass === "mage" && Math.random() < caster.magicCritChance;
+        let mult = isCrit ? 2 : 1;
+        let cName = caster.logName;
+
+        if (skillId === "potion") {
+            caster.hasPotion = false; caster.heal(15);
+            logMsg(`🧪 ${cName} выпивает Зелье Здоровья! Восстановлено 15 HP.`, "heal"); return;
+        }
+
+        caster.res -= C_DATA[caster.fClass].skills.find(s=>s.id===skillId).cost;
+        caster.cooldowns[skillId] = 3; 
+        
+        if(skillId === "blind_powder") {
+            let r = dealSkillDamage(caster, target, 3, true);
+            let bMsg = " Враг увернулся от ослепления.";
+            if (Math.random() < 0.65) {
+                let sMsg = applyStatus(caster, target, "blind", 1);
+                let realTarget = target.effects.shield.t > 0 ? caster : target;
+                realTarget.effects.regen.t = 0; realTarget.effects.thorns.t = 0; realTarget.effects.sharpen.c = 0; realTarget.samuraiBonus = 0;
+                bMsg = ` Враг ослеплен и теряет баффы!${sMsg}`;
+            }
+            logMsg(`🌫️ ${cName} бросает Ослепляющий порошок (${r.dmg} ур)!${bMsg}${r.msg}`, "spell"); return;
+        }
+        if(skillId === "sweep") {
+            let r = dealSkillDamage(caster, target, 3, false);
+            let sMsg = applyStatus(caster, target, "vuln", 2, 0.15);
+            logMsg(`🗡️ ${cName} делает Подсечку (${r.dmg} ур)! Враг теряет равновесие (+15% получаемого урона на 2 хода).${sMsg}${r.msg}`, "spell"); return;
+        }
+        if(skillId === "mana_shield") {
+            caster.effects.shield = {t:1}; logMsg(`🛡️ ${cName} возводит Щит Маны! Отражает 50% урона и ВСЕ дебаффы обратно во врага.`, "spell"); return;
+        }
+        if(skillId === "oath") {
+            caster.effects.thorns = {t:2}; logMsg(`✨ ${cName} приносит Святую Клятву! Блоки усилены и отражают урон.`, "spell"); return;
+        }
+        
+        if(skillId === "sharpen") {
+            caster.effects.sharpen = {c:1}; 
+            logMsg(`🗡️ ${cName} затачивает меч! +5 урона и пробивание блока на следующий удар.`, "spell"); return;
+        }
+        if(skillId === "shadow_stance") {
+            caster.effects.unblockable = {t:1};
+            caster.addRes(3);
+            logMsg(`👺 ${cName} принимает Стойку тени! Восстановлено 3 Эн. Следующий удар нельзя заблокировать.`, "spell"); return;
+        }
+
+        if(skillId === "torn_wound") {
+            let dmg = getRnd(caster.minDmg, caster.maxDmg);
+            if(caster.effects.dmgDebuff.t > 0) dmg = Math.max(1, dmg - caster.effects.dmgDebuff.a);
+            let r = dealSkillDamage(caster, target, dmg, false);
+            let sMsg = applyStatus(caster, target, "bleed", 3, 2, true);
+            logMsg(`🪓 ${cName} наносит Рваную Рану (${r.dmg} ур)! Враг истекает кровью.${sMsg}${r.msg}`, "crit");
+        }
+        else if (skillId === "execution") {
+            caster.takeDamage(3); 
+            let missingHp = caster.maxHp - caster.hp; 
+            let bonusDmg = Math.floor(missingHp / 5); 
+            let totalDmg = 3 + bonusDmg; 
+            let r = dealSkillDamage(caster, target, totalDmg, false);
+            logMsg(`🪓 ${cName} проводит жестокую Казнь! Теряет 3 HP, но наносит ${r.dmg} урона (Бонус от ран: +${bonusDmg}).${r.msg}`, "crit");
+        }
+        else if(skillId === "propolis") {
+            let r = dealSkillDamage(caster, target, getRnd(2, 3), false);
+            let sMsg = applyStatus(caster, target, "sticky", 2, 0.15);
+            logMsg(`🐝 ${cName} бросает прополис (${r.dmg} ур)! У врага все руки в меду.${sMsg}${r.msg}`, "spell");
+        }
+        else if(skillId === "honey") {
+            caster.heal(6);
+            caster.swarm = 1; // Сбрасываем рой до 1
+            logMsg(`🍯 ${cName} съедает медок! Отхил 6 ХП. Рой успокаивается до 1.`, "heal");
+        }
+        
+        else if(skillId === "punish") {
+            let r1 = dealSkillDamage(caster, target, getRnd(6, 8), false);
+            let r2 = dealSkillDamage(caster, target, 3, true);
+            let sMsg = applyStatus(caster, target, "atkDebuff", 1, 3);
+            logMsg(`🔨 ${cName} обрушивает Карающий удар (${r1.dmg + r2.dmg} суммарно)! Атака врага снижена.${sMsg}${r1.msg}${r2.msg}`, "spell");
+        }
+        else if(skillId === "lucky_strike") {
+            let isBlocked = bZones.includes(aZone.toString());
+            if (isBlocked) {
+                let r = dealSkillDamage(caster, target, 2, false);
+                logMsg(`🏹 Тяжелый арбалетный болт пробивает даже блок! (${r.dmg} ур)${r.msg}`, "hit");
+            } else {
+                let r = dealSkillDamage(caster, target, getRnd(2, 14), false);
+                logMsg(`🏹 ${cName} стреляет Шальным болтом! Урон: ${r.dmg}${r.msg}`, "crit");
+            }
+        }
+        
+        else if(skillId === "catalyst") {
+            let r = dealSkillDamage(caster, target, getRnd(2, 3), true);
+            let pMsg = "";
+            if (target.effects.poison.t > 0 && target.effects.poison.a > 0) {
+                target.effects.poison.a *= 2;
+                target.effects.poison.t = 1; // Сброс до 1 хода
+                pMsg = ` 🟢 Яд мутирует! Урон яда удвоен (до ${target.effects.poison.a}), но спадет через 1 ход.`;
+            } else {
+                pMsg = ` (На враге нет яда для мутации).`;
+            }
+            logMsg(`🧪 ${cName} бросает Катализатор (${r.dmg} ур)!${pMsg}${r.msg}`, "spell");
+        }
+        else if(skillId === "miasma") {
+            caster.effects.miasma = {t:2};
+            let sMsg = applyStatus(caster, target, "dmgDebuff", 2, 2);
+            logMsg(`🌫️ ${cName} распыляет Миазмы! Урон врага снижен на 2. Атаки доктора обретают пробивную силу.${sMsg}`, "spell");
+        }
+        else if(skillId === "burning_ice") {
+            let r = dealSkillDamage(caster, target, getRnd(3, 5) * mult, true);
+            let effectMsg = "";
+            if (Math.random() < 0.5) {
+                let sMsg = applyStatus(caster, target, "burn", 2, 1, true); 
+                if(sMsg === "") target.effects.ice.t = 0; 
+                effectMsg = ` Наложено Горение.${sMsg}`;
+            } else {
+                let sMsg = applyStatus(caster, target, "ice", 2); 
+                if(sMsg === "") target.effects.burn.t = 0;
+                effectMsg = ` Враг обморожен.${sMsg}`;
+            }
+            logMsg(`❄️🔥 ${cName} кастует Горящий Лёд (${r.dmg} ур)!${effectMsg}${r.msg}`, isCrit?"crit":"spell");
+        }
+        else if(skillId === "incendiary") {
+            let isBlocked = bZones.includes(aZone.toString());
+            let rMsg = "";
+            if (!isBlocked) {
+                let r = dealSkillDamage(caster, target, getRnd(3, 5), false);
+                rMsg = `(${r.dmg} ур) `;
+            }
+            let sMsg = applyStatus(caster, target, "burn", 2, 1, true);
+            logMsg(`🧨 ${cName} выпускает Зажигательный болт ${rMsg}! Взрыв поджигает врага.${sMsg}`, "spell");
+        }
+        else if(skillId === "hex") {
+            let r = dealSkillDamage(caster, target, getRnd(3, 4), true);
+            let sMsg = applyStatus(caster, target, "curse", 2, 2, true);
+            logMsg(`👁️ ${cName} насылает Сглаз (${r.dmg} ур)! Проклятие усилено на +2.${sMsg}${r.msg}`, "spell");
+        }
+        else if(skillId === "dark_armor") {
+            caster.effects.pacified = {t:1};
+            logMsg(`🌑 ${cName} облачается в Броню Неназываемого! Атака пропущена, но получаемый урон снижен на 65%.`, "spell");
+        }
+        else if(skillId === "shield_bash") {
+            let r = dealSkillDamage(caster, target, getRnd(4, 6), false);
+            let sMsg = applyStatus(caster, target, "exhaustion", 2, 1.0); // 1.0 = 100%
+            logMsg(`🧱 ${cName} бьет щитом (${r.dmg} ур)! Враг истощен.${sMsg}${r.msg}`, "spell");
+        }
+        else if(skillId === "pin") {
+            let r = dealSkillDamage(caster, target, getRnd(3, 5), false);
+            let sMsg = applyStatus(caster, target, "sunder", 2, 0.5); // 0.5 = 50%
+            logMsg(`📌 ${cName} применяет Пригвоздить (${r.dmg} ур)! Защита врага расколота.${sMsg}${r.msg}`, "spell");
+        }
+    }
+
+    function startGame() {
+        try {
+            selectedClass = getRadioVal("f_class", "rogue");
+            document.getElementById("start-screen").classList.remove("active");
+            document.getElementById("combat-screen").classList.add("active");
+            startNewBattle();
+        } catch (e) { alert("Ошибка!"); console.error(e); }
+    }
+    function goToStartScreen() { document.getElementById("combat-screen").classList.remove("active"); document.getElementById("start-screen").classList.add("active"); }
+
+    function startNewBattle() {
+        matchGender = Math.random() < 0.5 ? "male" : "female";
+        player = new Fighter("Игрок", selectedClass, matchGender, false);
+        let classes = ["rogue", "berserker", "mage", "paladin", "crossbowman", "plague_doctor", "warlock", "shieldbearer", "beekeeper", "samurai"];
+        bot = new Fighter("Вражина", pickRandom(classes), matchGender, true);
+        roundNum = 1;
+        document.getElementById("btn-fight").disabled = false; document.getElementById("btn-next").style.display = "none";
+        document.getElementById("log-area").innerHTML = ""; 
+        logMsg(`⚔️ Бой начался! Ваш противник: ${NAMES[matchGender][bot.fClass]}.`, "system");
+        updateStats();
+    }
+
+    function playRound() {
+        let pAtt = getRadioVal("attack", "1"); let pBlocks = getRadioVal("block", "1,2").split(","); let pSpell = getRadioVal("spell", "none");
+        
+        let bAtt = Math.floor(Math.random() * 4) + 1;
+        let bBlocks = ((bot.maxRes - bot.res >= 4) && Math.random() < 0.25) ? ["meditation"] : ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random()*4)].split(",");
+        
+        let bSpell = "none";
+        let botSpells = [];
+        if(bot.hasPotion && bot.hp < bot.maxHp * 0.4) botSpells.push("potion");
+        C_DATA[bot.fClass].skills.forEach(s => { if(bot.res >= s.cost && !bot.cooldowns[s.id]) botSpells.push(s.id); });
+        if(botSpells.length > 0 && Math.random() < 0.6) bSpell = pickRandom(botSpells);
+
+        logMsg(`<br>[--- РАУНД ${roundNum} ---]`, "system");
+        player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
+
+        if(!player.isAlive() || !bot.isAlive()) return checkGameOver();
+
+        if (pBlocks[0] === "meditation") { player.addRes(4); logMsg(`🧘 ${player.name} медитирует (+4). Защита открыта!`, "system"); pBlocks = []; }
+        if (bBlocks[0] === "meditation") { bot.addRes(4); logMsg(`🧘 ${bot.name} медитирует (+4). Защита открыта!`, "system"); bBlocks = []; }
+
+        if(pSpell !== "none") processSkill(player, bot, pSpell, pAtt, bBlocks);
+        if(bot.isAlive() && bSpell !== "none") processSkill(bot, player, bSpell, bAtt, pBlocks);
+
+        let pStrikes = [{zone: pAtt, ignoreBlock: false, half: false}]; 
+        let bStrikes = [{zone: bAtt, ignoreBlock: false, half: false}];
+        
+        // Разбойник (30%)
+        if (player.fClass === "rogue" && Math.random() < 0.30) { 
+            pStrikes.push({zone: pickRandom([1,2,3,4].filter(z=>z!=pAtt)), ignoreBlock: true, half: true, fixed: null, isSwarm: false}); 
+            logMsg(`🗡️ ${player.name}: Подлый двойной удар сквозь блок!`, "system"); 
+        }
+        if (bot.fClass === "rogue" && Math.random() < 0.30) { 
+            bStrikes.push({zone: pickRandom([1,2,3,4].filter(z=>z!=bAtt)), ignoreBlock: true, half: true, fixed: null, isSwarm: false}); 
+            logMsg(`🗡️ ${bot.name}: Подлый двойной удар сквозь блок!`, "system"); 
+        }
+        
+        // Рой Пчеловода бьет в рандомную зону (может попасть в блок)
+        if (player.fClass === "beekeeper" && player.swarm > 0) {
+            pStrikes.push({zone: Math.floor(Math.random()*4)+1, ignoreBlock: false, half: false, fixed: player.swarm, isSwarm: true});
+        }
+        if (bot.fClass === "beekeeper" && bot.swarm > 0) {
+            bStrikes.push({zone: Math.floor(Math.random()*4)+1, ignoreBlock: false, half: false, fixed: bot.swarm, isSwarm: true});
+        }
+        
+        pStrikes.forEach(s => { if(player.isAlive()&&bot.isAlive()) { let [m,t] = calculateStrike(player, bot, s.zone, bBlocks, s.fixed, s.ignoreBlock, s.half, s.isSwarm); logMsg(m,t); }});
+        bStrikes.forEach(s => { if(bot.isAlive()&&player.isAlive()) { let [m,t] = calculateStrike(bot, player, s.zone, pBlocks, s.fixed, s.ignoreBlock, s.half, s.isSwarm); logMsg(m,t); }});
+        
+        [player, bot].forEach(f => {
+            if(!f.isAlive()) return; 
+            
+            if(f.fClass==="samurai") {
+                if(!f.dealtPhysDmgThisTurn) f.samuraiBonus += 2; else f.samuraiBonus = 0;
+            }
+            
+            let enemy = (f === player) ? bot : player;
+            let dotMsg = "";
+
+            // Умная функция ДоТов с учетом воска Пчеловода
+            let applyDotDamage = (type, name, icon) => {
+                if (f.effects[type].t > 0) {
+                    let d = f.effects[type].a;
+                    let blockMsg = "";
+                    if (f.fClass === "beekeeper" && Math.random() < 0.25) {
+                        d = Math.max(0, d - 2); blockMsg = ` 🍯 Воск (-2)!`;
+                        applyStatus(f, enemy, "sticky", 2, 0.15); blockMsg += ` Враг в меду!`;
+                    }
+                    f.takeDamage(d);
+                    dotMsg += ` ${icon} ${name} (-${d} HP)${blockMsg}!`;
+                    f.effects[type].t--;
+                }
+            };
+
+            applyDotDamage("burn", "Горение", "🔥");
+            applyDotDamage("poison", "Яд", "🟢");
+            applyDotDamage("bleed", "Кровотечение", "🩸");
+            applyDotDamage("curse", "Проклятие", "💀");
+            
+            // --- Отхил Чернокнижника ---
+            if (f.fClass === "warlock" && enemy.effects.curse.t > 0) {
+                let healAmt = f.effects.pacified.t > 0 ? 3 : 1;
+                f.heal(healAmt);
+                dotMsg += ` 🦇 Вытягивание жизни (+${healAmt} HP)!`;
+            }
+            
+            if(f.effects.regen.t > 0) { f.heal(f.effects.regen.a); dotMsg += ` 💚 Регенерация (+${f.effects.regen.a} HP)!`; f.effects.regen.t--; }
+            
+            if (dotMsg !== "") logMsg(`${f.name}:${dotMsg}`, "dot");
+
+            // Таймеры дебаффов
+            if(f.effects.ice.t>0) f.effects.ice.t--;
+            if(f.effects.blind.t>0) f.effects.blind.t--;
+            if(f.effects.dmgDebuff.t>0) f.effects.dmgDebuff.t--;
+            if(f.effects.atkDebuff.t>0) f.effects.atkDebuff.t--;
+            if(f.effects.thorns.t>0) f.effects.thorns.t--;
+            if(f.effects.shield.t>0) f.effects.shield.t--;
+            if(f.effects.vuln.t>0) f.effects.vuln.t--;
+            if(f.effects.exhaustion.t>0) f.effects.exhaustion.t--;
+            if(f.effects.sunder.t>0) f.effects.sunder.t--;
+            if(f.effects.sticky.t>0) f.effects.sticky.t--;
+            if(f.effects.pacified.t>0) f.effects.pacified.t--;
+            if(f.effects.miasma.t>0) f.effects.miasma.t--;
+
+            for(let k in f.cooldowns) if(f.cooldowns[k]>0) f.cooldowns[k]--;
+        });
+
+        updateStats(); roundNum++;
+        let rInp = document.querySelector('input[name="spell"][value="none"]'); if(rInp) rInp.checked = true;
+        checkGameOver();
+    }
+
+    function checkGameOver() {
+        if(!player.isAlive() || !bot.isAlive()) {
+            document.getElementById("btn-fight").disabled = true; 
+            updateStats();
+            logMsg("<br>=== БОЙ ОКОНЧЕН ===", "system");
+            
+            if(player.isAlive()) { 
+                logMsg("🏆 Вражина повержена. Вы победили!", "system"); 
+            } else if(bot.isAlive()) { 
+                logMsg("💀 Вы пали на арене...", "system"); 
+            } else { 
+                logMsg("🤝 Ничья. Оба погибли.", "system"); 
+            }
+            
+            // Теперь кнопка появляется всегда, когда бой окончен
+            document.getElementById("btn-next").style.display = "block"; 
+        }
+    }
+</script>
+</body>
+</html>
