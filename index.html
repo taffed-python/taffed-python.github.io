@@ -503,7 +503,7 @@
                 </div></div>
             </label>
             <div style="text-align: center; color: #DEE2B1; font-size: 13.5px; margin-top: 15px; font-style: italic;">
-            🎲 *В бою с вероятностью 5% может произойти что-то хорошее или что-то плохое, уникальное для каждого класса.
+            🎲 *В бою с вероятностью 5% может произойти что-то хорошее 🍀 или плохое 🤬, уникальное для каждого класса.
         </div>
         </div>
         
@@ -578,46 +578,46 @@
 <script>
     const ZONES = {1: "Голову", 2: "Грудь", 3: "Живот", 4: "Ноги"};
     
-    const C_DATA = {
+const C_DATA = {
         rogue: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
-            {id: "blind_powder", name: "Ослепляющий порошок", cost: 4, type: "skill", desc: "Наносит 3 урона. 65% шанс ослепить врага (100% промах физ. атакой) и снять баффы."},
-            {id: "sweep", name: "Подсечка (Уязвимость)", cost: 4, type: "skill", desc: "Наносит 3 урона. Накладывает Уязвимость (+15% получаемого урона) на 2 хода."}
+            {id: "blind_powder", name: "😵 Ослепляющий порошок", cost: 4, type: "skill", desc: "Наносит 3 урона. 65% шанс ослепить врага (100% промах физ. атакой) и снять баффы."},
+            {id: "sweep", name: "🎯 Подсечка", cost: 4, type: "skill", desc: "Наносит 3 урона. Накладывает Уязвимость (+15% получаемого урона) на 2 хода."}
         ]},
         berserker: { hp: 60, res: "energy", minD: 2, maxD: 7, skills: [
-            {id: "torn_wound", name: "Рваная рана", cost: 4, type: "skill", desc: "Обычный удар и вешает Кровотечение (2 урона на 3 хода)."},
-            {id: "execution", name: "Казнь", cost: 5, type: "skill", desc: "Платит 3 HP. Наносит 3 базового урона сквозь блок + 1 доп. урон за каждые 5 потерянных вами HP."}
+            {id: "torn_wound", name: "🩸 Рваная рана", cost: 4, type: "skill", desc: "Обычный удар и вешает Кровотечение (2 урона на 3 хода)."},
+            {id: "execution", name: "🪓 Казнь", cost: 5, type: "skill", desc: "Платит 3 HP. Наносит 3 базового урона сквозь блок + 1 доп. урон за каждые 5 потерянных вами HP."}
         ]},
         mage: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
-            {id: "burning_ice", name: "Горящий лёд", cost: 4, type: "skill", desc: "3-5 маг. урона + шанс повесить Горение (1 ур/2 хода) ИЛИ Лед (50% шанс промаха на 2 хода)."},
-            {id: "mana_shield", name: "Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 50% получаемого урона и любые статусные эффекты обратно во врага."}
+            {id: "burning_ice", name: "🔥 Горящий лёд 🧊", cost: 4, type: "skill", desc: "3-5 маг. урона + шанс повесить Горение (1 ур/2 хода) ИЛИ Лед (50% шанс промаха на 2 хода)."},
+            {id: "mana_shield", name: "🛡️ Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 50% получаемого урона и любые статусные эффекты обратно во врага."}
         ]},
         paladin: { hp: 60, res: "mana", minD: 4, maxD: 6, skills: [
-            {id: "punish", name: "Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Если враг ставит блок, он поглотит только физическую часть."},
-            {id: "oath", name: "Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
+            {id: "punish", name: "⛓️ Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Если враг ставит блок, он поглотит только физическую часть."},
+            {id: "oath", name: "✨ Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
         ]},
         crossbowman: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
-            {id: "lucky_strike", name: "Lucky Strike", cost: 4, type: "skill", desc: "2 урона в блок, либо от 2 до 14 урона по открытой цели."},
-            {id: "incendiary", name: "Зажигательный болт", cost: 4, type: "skill", desc: "3-5 урона + взрыв вешает Горение (1 урон на 2 хода)."}
+            {id: "lucky_strike", name: "🏹 Lucky Strike", cost: 4, type: "skill", desc: "2 урона в блок, либо от 2 до 14 урона по открытой цели."},
+            {id: "incendiary", name: "🔥 Зажигательный болт", cost: 4, type: "skill", desc: "3-5 урона + взрыв вешает Горение (1 урон на 2 хода)."}
         ]},
         plague_doctor: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
-            {id: "catalyst", name: "Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона и удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода)."},
-            {id: "miasma", name: "Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 2, а ваши атаки получают 50% шанс проигнорировать блок."}
+            {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона и удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода)."},
+            {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 2, а ваши атаки получают 50% шанс проигнорировать блок."}
         ]},
         warlock: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
-            {id: "hex", name: "Сглаз", cost: 4, type: "skill", desc: "Наносит 3-4 маг. урона. Добавляет +2 урона к Проклятию на враге (на 2 хода)."},
-            {id: "dark_armor", name: "Броня Неназываемого", cost: 5, type: "skill", desc: "На 1 ход вы не атакуете, но получаете на 65% меньше урона, а лечение от проклятия возрастает до 3 HP."}
+            {id: "hex", name: "💀 Сглаз", cost: 4, type: "skill", desc: "Наносит 3-4 маг. урона. Добавляет +2 урона к Проклятию на враге (на 2 хода)."},
+            {id: "dark_armor", name: "🌑 Броня Неназываемого", cost: 5, type: "skill", desc: "На 1 ход вы не атакуете, но получаете на 65% меньше урона, а лечение от проклятия возрастает до 3 HP."}
         ]},
         shieldbearer: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
-            {id: "shield_bash", name: "Удар щитом", cost: 5, type: "skill", desc: "Наносит 4-6 урона. Истощение: снижает регенерацию ресурсов врага на 100% на 2 хода (минимум 1)."},
-            {id: "pin", name: "Пригвоздить", cost: 5, type: "skill", desc: "Наносит 3-5 урона. Раскол: блоки врага проваливаются с шансом 50% на 2 хода."}
+            {id: "shield_bash", name: "🪫 Удар щитом", cost: 5, type: "skill", desc: "Наносит 4-6 урона. Истощение: снижает регенерацию ресурсов врага на 100% на 2 хода (минимум 1)."},
+            {id: "pin", name: "💔 Пригвоздить", cost: 5, type: "skill", desc: "Наносит 3-5 урона. Раскол: блоки врага проваливаются с шансом 50% на 2 хода."}
         ]},
         beekeeper: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
-            {id: "propolis", name: "Залепи дуло", cost: 4, type: "skill", desc: "Наносит 2-3 урона и вешает Липкие руки (15% шанс промаха) на 2 хода."},
-            {id: "honey", name: "Медок", cost: 5, type: "skill", desc: "Восстанавливает 6 HP. Размер Роя сбрасывается до 1."}
+            {id: "propolis", name: "🍯 Залепи дуло", cost: 4, type: "skill", desc: "Наносит 2-3 урона и вешает Липкие руки (15% шанс промаха) на 2 хода."},
+            {id: "honey", name: "💚 Медок", cost: 5, type: "skill", desc: "Восстанавливает 6 HP. Размер Роя сбрасывается до 1."}
         ]},
         samurai: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
-            {id: "sharpen", name: "Заточка меча", cost: 4, type: "skill", desc: "Следующий удар получает +5 урона и наполовину прорезает чужой блок."},
-            {id: "shadow_stance", name: "Стойка тени", cost: 3, type: "skill", desc: "Восстанавливает 3 энергии. Ваш следующий удар становится 100% неблокируемым."}
+            {id: "sharpen", name: "🗡️ Заточка меча", cost: 4, type: "skill", desc: "Следующий удар получает +5 урона и наполовину прорезает чужой блок."},
+            {id: "shadow_stance", name: "👺 Стойка тени", cost: 3, type: "skill", desc: "Восстанавливает 3 энергии. Ваш следующий удар становится 100% неблокируемым."}
         ]}
     };
 
@@ -747,18 +747,15 @@
         let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
         
         if(e.burn.t > 0) html += `<span class="status-badge sb-burn" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>🔥 ${e.burn.t}</span>`;
-        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>🟢 ${e.poison.t}</span>`;
-        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
+        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>⚗️ ${e.poison.t}</span>`;        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
         if(e.curse.t > 0) html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
         if(e.ice.t > 0) html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
-        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>📉 ${e.dmgDebuff.t}</span>`;
-        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
+        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>⛓️ ${e.dmgDebuff.t}</span>`;        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
         if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>✨ ${e.thorns.t}</span>`;
         if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
         if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
         if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
-        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🔋 ${e.exhaustion.t}</span>`;
-        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
+        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🪫 ${e.exhaustion.t}</span>`;        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
         if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
         if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
         if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
@@ -812,10 +809,10 @@
         document.getElementById("b-avatar").src = AVATARS[matchGender][bot.fClass];
         renderStatuses(bot, "b-status");
 
-        let html = `<label style="flex-direction: column; align-items: flex-start;">
+        let html = `<label style="flex-direction: column; align-items: flex-start; text-align: left;">
             <div style="display: flex; align-items: center;">
                 <input type="radio" name="spell" value="none" checked> 
-                <span style="font-weight: bold;">⚔️ Базовая атака</span>
+                <span style="font-weight: bold;">Базовая атака</span>
             </div>
             <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
                 Обычная атака без затрат ресурсов.
@@ -823,10 +820,10 @@
         </label>`;
 
         if(player.hasPotion) {
-            html += `<label style="flex-direction: column; align-items: flex-start;">
+            html += `<label style="flex-direction: column; align-items: flex-start; text-align: left;">
                 <div style="display: flex; align-items: center;">
                     <input type="radio" name="spell" value="potion"> 
-                    <span style="font-weight: bold;">🧪 Зелье восстановления [1 шт]</span>
+                    <span style="font-weight: bold;">💊 Допинг [1 шт]</span>
                 </div>
                 <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
                     Восстанавливает 10-15 здоровья и 2-3 ресурса. Не тратит ход.
@@ -839,17 +836,17 @@
             let dis = (player.res < s.cost || cd > 0) ? "disabled" : "";
             let cdTxt = cd > 0 ? ` <span style="color:#e74c3c; margin-left: 6px;">⏳ [КД: ${cd}]</span>` : "";
             
-            html += `<label class="${dis}" style="flex-direction: column; align-items: flex-start;">
+            html += `<label class="${dis}" style="flex-direction: column; align-items: flex-start; text-align: left;">
                 <div style="display: flex; align-items: center;">
                     <input type="radio" name="spell" value="${s.id}" ${dis?'disabled':''}> 
-                    <span style="font-weight: bold;">✨ ${s.name} (${s.cost} ${player.resType==='energy'?'Эн.':'Ман.'})</span>${cdTxt}
+                    <span style="font-weight: bold;">${s.name} (${s.cost} ${player.resType==='energy'?'Эн.':'Ман.'})</span>${cdTxt}
                 </div>
                 <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
                     ${s.desc || ''}
                 </div>
             </label>`;
         });
-        
+
         document.getElementById("skills-container").innerHTML = html;
         // --- Управление VFX эффектами на аватарках (Приоритет: последний полученный) ---
         function applyVFX(f, avatarId) {
@@ -967,7 +964,7 @@
         if(att.effects.pacified.t > 0) {
             return [`🌑 ${att.logName} укрыт Броней Неназываемого и не совершает атаку.`, "system"];
         }
-        // --- 🎲 D20 МЕХАНИКА (СВЕЗЛО / ЗАПАДЛО) ---
+        // --- 🍀 D20 МЕХАНИКА (СВЕЗЛО / ЗАПАДЛО) ---
         let d20Msg = "";
         let d20DmgBonus = 0;
         if (!att.d20Rolled && !isSwarm) {
@@ -978,76 +975,76 @@
             if (roll < 0.025) { // 🟢 2.5% СВЕЗЛО
                 if (att.fClass === "rogue") {
                     att.effects.bonusRegen = {t: 2, a: 3};
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Выброс адреналина: регенерация энергии +3 на 2 хода!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Выброс адреналина: регенерация энергии +3 на 2 хода!</span><br>`;
                 } else if (att.fClass === "berserker") {
                     att.megaCrit = true;
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Мега-крит: урон будет умножен на 1.5!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Мега-крит: урон будет умножен на 1.5!</span><br>`;
                 } else if (att.fClass === "mage") {
                     if (isBasic) d20DmgBonus += 2;
                     applyStatus(att, def, "ice", 1);
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Посохом в глазень! +2 урона, враг приложил холодное на ушиб, 50% промаха (Лед)!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Посохом в глазень! +2 урона, враг приложил холодное на ушиб, 50% промаха (Лед)!</span><br>`;
                 } else if (att.fClass === "paladin") {
                     let amt = getRnd(2, 3);
                     att.maxHp += amt; att.heal(amt);
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Слава Иису! Макс. HP и здоровье увеличены на ${amt}!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Слава Иису! Макс. HP и здоровье увеличены на ${amt}!</span><br>`;
                 } else if (att.fClass === "crossbowman") {
                     att.headshot = true;
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Стрелой в лоб! Если не в блок — враг получит Уязвимость!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Стрелой в лоб! Если не в блок — враг получит Уязвимость!</span><br>`;
                 } else if (att.fClass === "plague_doctor") {
                     let hDebuff = getRnd(4, 5);
                     applyStatus(att, def, "healDebuff", 99, hDebuff); // Срез лечения на врага
                     att.effects.regen = {t: 2, a: 2}; // Вешаем на себя Регенерацию
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Коронавирус! Следующее лечение врага снижено на ${hDebuff}, а Доктор получает Регенерацию (+2 HP) на 2 хода!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Коронавирус! Следующее лечение врага снижено на ${hDebuff}, а Доктор получает Регенерацию (+2 HP) на 2 хода!</span><br>`;
                 
                 } else if (att.fClass === "warlock") {
                     let curseBoost = getRnd(3, 4);
                     applyStatus(att, def, "curse", 2, curseBoost, true);
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Продал душу демонам! Урон Проклятия мгновенно усилен на +${curseBoost}!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Продал душу демонам! Урон Проклятия мгновенно усилен на +${curseBoost}!</span><br>`;
                 } else if (att.fClass === "shieldbearer") {
                     if (isBasic) d20DmgBonus += 2;
                     applyStatus(att, def, "vuln", 2, 0.15);
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Сбил с ног! +2 урона и Уязвимость врагу на 2 хода!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Сбил с ног! +2 урона и Уязвимость врагу на 2 хода!</span><br>`;
                 } else if (att.fClass === "beekeeper") {
                     att.swarm = 3;
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Пчеломатка атакует! Рой мгновенно вырастает до максимума (3)!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Пчеломатка атакует! Рой мгновенно вырастает до максимума (3)!</span><br>`;
                 } else if (att.fClass === "samurai") {
                     if (isBasic) d20DmgBonus += 2;
                     let resBurn = getRnd(2, 3); def.res = Math.max(0, def.res - resBurn);
-                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Духи предков помогают в бою: +2 урона и сожжено ${resBurn} энергии врага!</span><br>`;
+                    d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Духи предков помогают в бою: +2 урона и сожжено ${resBurn} энергии врага!</span><br>`;
                 }
             } else if (roll < 0.05) { // 🔴 2.5% ЗАПАДЛО
                 if (att.fClass === "rogue") {
                     isHalfDmg = true;
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Из трясущихся рук выскользывает кинжал! Урон снижен на 50%!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Из трясущихся рук выскользывает кинжал! Урон снижен на 50%!</span><br>`;
                 } else if (att.fClass === "berserker") {
                     applyStatus(att, att, "bleed", 2, 2, true);
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перестарался! Берсерк вешает на себя Кровотечение (2 ур/2 хода)!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Перестарался! Берсерк вешает на себя Кровотечение (2 ур/2 хода)!</span><br>`;
                 } else if (att.fClass === "mage") {
                     att.takeDamage(2); att.res = Math.max(0, att.res - 1);
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перегрев посоха! Маг получает 2 урона и теряет 1 ману!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Перегрев посоха! Маг получает 2 урона и теряет 1 ману!</span><br>`;
                 } else if (att.fClass === "paladin") {
                     att.takeDamage(2); att.effects.weakBlock = {t: 1, a: 2};
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Боги гневаются! Молния с неба наносит 2 урона, следующий блок пропустит 2 урона!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Боги гневаются! Молния с неба наносит 2 урона, следующий блок пропустит 2 урона!</span><br>`;
                 } else if (att.fClass === "crossbowman") {
                     if (isBasic) att.crossbowJam = true;
                     let eLoss = getRnd(2, 3); att.res = Math.max(0, att.res - eLoss);
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Осечка! Потеряно ${eLoss} энергии, урон не больше 1!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Осечка! Потеряно ${eLoss} энергии, урон не больше 1!</span><br>`;
                 } else if (att.fClass === "plague_doctor") {
                     att.skipBlock = true;
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Госпитализация! Доктор 100% провалит свой блок в этом ходу!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Госпитализация! Доктор 100% провалит свой блок в этом ходу!</span><br>`;
                 } else if (att.fClass === "warlock") {
                     let hpLoss = getRnd(2, 3);
                     att.maxHp -= hpLoss; att.hp = Math.min(att.hp, att.maxHp);
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Оплата долгов! Платит кровью и навсегда теряет ${hpLoss} Макс. HP!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Оплата долгов! Платит кровью и навсегда теряет ${hpLoss} Макс. HP!</span><br>`;
                 } else if (att.fClass === "shieldbearer") {
                     applyStatus(att, att, "weakBlock", 2, 0.5); 
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Уронил щит на ногу! 2 хода любой блок режет урон лишь на 50%!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Уронил щит на ногу! 2 хода любой блок режет урон лишь на 50%!</span><br>`;
                 } else if (att.fClass === "beekeeper") {
                     att.takeDamage(2); att.swarm = 0;
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Пчелы взбунтовались! Укусили хозяина на 2 урона, Рой разлетелся!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Пчелы взбунтовались! Укусили хозяина на 2 урона, Рой разлетелся!</span><br>`;
                 } else if (att.fClass === "samurai") {
                     d20DmgBonus -= 2; applyStatus(att, att, "sunder", 1, 0.5);
-                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перепил саке? Получи леща от жены. Урон снижен на 2, шанс провала блока 50%!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Перепил саке? Получи леща от жены. Урон снижен на 2, шанс провала блока 50%!</span><br>`;
                 }
             }
         }
@@ -1057,7 +1054,7 @@
         if (isSwarm) verb = "напускает рой на";
 
         if(att.effects.sticky.t > 0 && Math.random() < att.effects.sticky.a) return [d20Msg + `🍯 Липкие руки мешают! ${att.logName} промахивается!`, "dodge"];
-        if(att.effects.blind.t > 0) { att.effects.blind.t = 0; return [d20Msg + `🌫️ Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"]; }
+        if(att.effects.blind.t > 0) { att.effects.blind.t = 0; return [d20Msg + `😵 Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"]; }
         if(att.effects.ice.t > 0 && Math.random() < 0.5) return [d20Msg + `🧊 ${att.logName} поскальзывается на льду! Промах!`, "dodge"];
 
         let isBlocked = bZones.includes(aZone.toString());
@@ -1098,7 +1095,13 @@
         if(def.fClass === "rogue" && def.effects.blind.t===0 && Math.random() < def.dodgeChance) { def.addRes(1); return [d20Msg + `💨 ${def.logName} перекатом уходит от атаки! (+1 Эн.)`, "dodge"]; }
 
         let gainMsg = "";
-        if (!isSwarm) { att.dealtPhysDmgThisTurn = true; att.addRes(1); gainMsg = " ⚡ (+1 рес.)"; }
+        if (!isSwarm) { 
+            att.dealtPhysDmgThisTurn = true; 
+            att.addRes(1); 
+            let resIcon = att.resType === "energy" ? "⚡" : "💧";
+            let resText = att.resType === "energy" ? "эн." : "ман.";
+            gainMsg = ` ${resIcon} (+1 ${resText})`; 
+        }
 
         let dmg = fixedDmg !== null ? fixedDmg : getRnd(att.minDmg, att.maxDmg);
         dmg += d20DmgBonus; // Бонус от СВЕЗЛО
@@ -1159,7 +1162,7 @@
             let healAmt = def.effects.poison.t > 0 ? getRnd(2, 3) : 1;
             att.heal(healAmt);
             let sMsg = applyStatus(att, def, "poison", 2, 1, true); 
-            msg += ` 🩸 Вампиризм (+${healAmt} HP)! 🟢 Яд усилен.${sMsg}`;
+            msg += ` 🩸 Вампиризм (+${healAmt} HP)! ⚗️ Яд усилен.${sMsg}`;
         }
         if (att.fClass === "crossbowman" && Math.random() < 0.25) {
             msg += applyStatus(att, def, "dmgDebuff", 2, 2); msg += ` 🦵 Прострел ноги (-2 урон врага)!`;
@@ -1195,8 +1198,8 @@
             let resAmt = getRnd(2, 3);
             caster.heal(healAmt);
             caster.addRes(resAmt);
-            let rName = caster.resType === "energy" ? "Энергии" : "Маны";
-            logMsg(`🧪 ${cName} выпивает Зелье! Восстановлено ${healAmt} HP и ${resAmt} ${rName}.`, "heal"); 
+            let rName = caster.resType === "energy" ? "Эн." : "Ман.";
+            logMsg(`💊 ${cName} принимает Допинг! Восстановлено ${healAmt} HP и ${resAmt} ${rName}.`, "heal"); 
             return;
         }
 
@@ -1212,7 +1215,7 @@
                 realTarget.effects.regen.t = 0; realTarget.effects.thorns.t = 0; realTarget.effects.sharpen.c = 0; realTarget.samuraiBonus = 0;
                 bMsg = ` Враг ослеплен и теряет баффы!${sMsg}`;
             }
-            logMsg(`🌫️ ${cName} бросает Ослепляющий порошок (${r.dmg} ур)!${bMsg}${r.msg}`, "spell"); return;
+            logMsg(`😵 ${cName} бросает Ослепляющий порошок (${r.dmg} ур)!${bMsg}${r.msg}`, "spell"); return;
         }
         if(skillId === "sweep") {
             let r = dealSkillDamage(caster, target, 3, false);
@@ -1294,7 +1297,7 @@
         else if(skillId === "miasma") {
             caster.effects.miasma = {t:2};
             let sMsg = applyStatus(caster, target, "dmgDebuff", 2, 2);
-            logMsg(`🌫️ ${cName} распыляет Миазмы! Урон врага снижен на 2. Атаки доктора обретают пробивную силу.${sMsg}`, "spell");
+            logMsg(`😵 ${cName} распыляет Миазмы! Урон врага снижен на 2. Атаки доктора обретают пробивную силу.${sMsg}`, "spell");
         }
         else if(skillId === "burning_ice") {
             let r = dealSkillDamage(caster, target, getRnd(3, 5) * mult, true);
@@ -1454,7 +1457,7 @@
             };
 
             applyDotDamage("burn", "Горение", "🔥");
-            applyDotDamage("poison", "Яд", "🟢");
+            applyDotDamage("poison", "Яд", "⚗️");
             applyDotDamage("bleed", "Кровотечение", "🩸");
             applyDotDamage("curse", "Проклятие", "💀");
             
