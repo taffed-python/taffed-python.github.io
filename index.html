@@ -742,23 +742,49 @@ const C_DATA = {
    function renderStatuses(f, containerId) {
         let html = "";
         let e = f.effects;
-        
-        // Эта переменная автоматически делает статус кликабельным на iPad и ПК
         let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
         
-        if(e.burn.t > 0) html += `<span class="status-badge sb-burn" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>🔥 ${e.burn.t}</span>`;
-        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>⚗️ ${e.poison.t}</span>`;        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
-        if(e.curse.t > 0) html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
-        if(e.ice.t > 0) html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
-        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>⛓️ ${e.dmgDebuff.t}</span>`;        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
-        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>✨ ${e.thorns.t}</span>`;
-        if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
-        if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
-        if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
-        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🪫 ${e.exhaustion.t}</span>`;        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
-        if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
-        if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
-        if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
+        // Путь к папке с иконками
+        const iconPath = "assets/icons/";
+
+        // Функция-помощник для создания HTML иконки вместо эмодзи
+        const getIcon = (fileName) => `<img src="${iconPath}${fileName}" style="width:14px; height:14px; vertical-align:middle; margin-right:2px;">`;
+
+        if(e.burn.t > 0) 
+            html += `<span class="status-badge sb-burn" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>${getIcon('status_burn.png')} ${e.burn.t}</span>`;
+        
+        if(e.poison.t > 0) 
+            html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>${getIcon('status_poison.png')} ${e.poison.t}</span>`;
+        
+        if(e.bleed.t > 0) 
+            html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>${getIcon('status_blood.png')} ${e.bleed.t}</span>`;
+        
+        if(e.curse.t > 0) 
+            html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`; // Оставил череп, так как в списке нет иконки проклятия
+        
+        if(e.ice.t > 0) 
+            html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>${getIcon('status_frost.png')} ${e.ice.t}</span>`;
+        
+        if(e.dmgDebuff.t > 0 || e.atkDebuff.t > 0 || e.miasma.t > 0) 
+            html += `<span class="status-badge sb-debuff" title="Слабость: урон снижен. Ходов: ${Math.max(e.dmgDebuff.t, e.atkDebuff.t, e.miasma.t)}" ${oc}>${getIcon('status_chains.png')}</span>`;
+
+        if(e.regen.t > 0) 
+            html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>${getIcon('status_regen.png')} ${e.regen.t}</span>`;
+        
+        if(e.vuln.t > 0) 
+            html += `<span class="status-badge sb-vuln" title="Уязвимость: получает больше урона. Ходов: ${e.vuln.t}" ${oc}>${getIcon('status_vuln.png')} ${e.vuln.t}</span>`;
+        
+        if(e.exhaustion.t > 0) 
+            html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена. Ходов: ${e.exhaustion.t}" ${oc}>${getIcon('status_exhaust.png')} ${e.exhaustion.t}</span>`;
+        
+        if(e.sticky.t > 0) 
+            html += `<span class="status-badge sb-debuff" title="Липкие руки: шанс промаха. Ходов: ${e.sticky.t}" ${oc}>${getIcon('status_honey.png')} ${e.sticky.t}</span>`;
+
+        // Баффы без кастомных иконок (оставляем старую логику)
+        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва" ${oc}>✨ ${e.thorns.t}</span>`;
+        if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка" ${oc}>🗡️ ${e.sharpen.c}</span>`;
+        if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка" ${oc}>👺 +${f.samuraiBonus}</span>`;
+        if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой" ${oc}>🐝 ${f.swarm}</span>`;
         
         document.getElementById(containerId).innerHTML = html;
     }
