@@ -194,10 +194,48 @@
     .avatar-debuff { filter: saturate(0.5) opacity(0.8); border-color: #95a5a6; } /* Любая слабость */
 
     .bar-container { width: 100%; background: #06362D; height: 16px; border-radius: 8px; margin-top: 5px; overflow: hidden; position: relative; border: 1px solid #D1A505;}
-    .bar-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; font-weight: bold; text-shadow: 0 1px 2px #000; z-index: 2;}
-    .hp-bar { height: 100%; background: linear-gradient(90deg, #c0392b, #e74c3c); transition: width 0.3s ease-in-out; }
-    /* --- Анимация получения урона (Легкая тряска и красное свечение) --- */
-    /* --- Анимация получения урона (Красная тряска) --- */
+    .bar-text { 
+    position: absolute; 
+    width: 100%; 
+    text-align: center; 
+    font-size: 11px; 
+    line-height: 16px; 
+    color: #fff; 
+    font-weight: bold; 
+    text-shadow: 0 1px 2px #000; 
+    z-index: 10; /* Текст теперь гарантированно выше всех полосок */
+    pointer-events: none; /* Чтобы текст не мешал кликам, если они будут */
+}    
+    .bar-container { 
+    position: relative; /* Чтобы фантом ложился под основную полоску */
+    width: 100%; 
+    background: #06362D; 
+    height: 16px; 
+    border-radius: 8px; 
+    margin-top: 5px; 
+    overflow: hidden; 
+    border: 1px solid #D1A505;
+}
+
+/* Фантомная полоска (светло-красная/белая) */
+.hp-ghost {
+    position: absolute;
+    top: 0; left: 0; height: 100%;
+    background: #DEE2B1; /* Цвет ванили, как ваш текст */
+    opacity: 0.4;
+    transition: width 1.2s ease-out; /* Угасает медленнее основной */
+    z-index: 1;
+}
+
+/* Основная полоска здоровья */
+.hp-bar { 
+    position: absolute;
+    top: 0; left: 0; height: 100%; 
+    background: linear-gradient(90deg, #c0392b, #e74c3c); 
+    transition: width 0.6s ease-in-out; /* Основная полоска быстрее */
+    z-index: 2;
+}
+    /* --- Анимация получения урона */
     @keyframes damage-shake {
         0%, 100% { transform: translateX(0); border-color: #D1A505; }
         20% { transform: translateX(-3px); border-color: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
@@ -211,8 +249,8 @@
         50% { transform: translateY(-2px); border-color: #2ecc71; box-shadow: 0 0 12px #2ecc71; }
     }
     .heal-anim { animation: heal-glow 0.45s ease-in-out; }
-    .res-mana { height: 100%; background: linear-gradient(90deg, #2980b9, #3498db); transition: width 0.3s ease-in-out; }
-    .res-energy { height: 100%; background: linear-gradient(90deg, #D1A505, #FFD500); transition: width 0.3s ease-in-out; }
+    .res-mana { height: 100%; background: linear-gradient(90deg, #2980b9, #3498db); transition: width 0.8s ease-in-out; }
+    .res-energy { height: 100%; background: linear-gradient(90deg, #D1A505, #FFD500); transition: width 0.8s ease-in-out; }
     
     /* Статусы - яркие плашки */
     .status-bar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 22px; margin-top: 8px; width: 100%;}
@@ -237,7 +275,20 @@
     #log-area::-webkit-scrollbar-thumb { background: #155332; border-radius: 8px; border: 1px solid rgba(209, 165, 5, 0.5); }
     #log-area::-webkit-scrollbar-thumb:hover { background: rgba(209, 165, 5, 0.8); }
 
-    .log-msg { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #155332; line-height: 1.4;}
+/* --- Анимация появления строк лога --- */
+    @keyframes log-slide-in {
+        0% { opacity: 0; transform: translateX(-30px); }
+        100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .log-msg { 
+        margin-bottom: 6px; 
+        padding-bottom: 6px; 
+        border-bottom: 1px solid #155332; 
+        line-height: 1.4;
+        /* Добавляем вызов анимации: */
+        animation: log-slide-in 0.35s ease-out forwards; 
+    }    
     
     /* Подсветка текста в логе */
     .crit { color: #FFD500; font-weight: bold; } .hit { color: #fff; font-weight: 600;}
@@ -255,7 +306,7 @@
         .combat-right { flex: 4; display: flex; flex-direction: column; justify-content: space-between;}
     }
 
-  /* Управление - Панели */
+    /* Управление - Панели */
     .controls { display: flex; flex-direction: column; gap: 10px; height: 100%;}
     .control-box { background: #06362D; padding: 12px; border: 1px solid #D1A505; border-radius: 10px; flex-grow: 1; box-shadow: inset 0 0 10px rgba(0,0,0,0.3);}
     
@@ -315,7 +366,30 @@
     #btn-start:hover { background: #D1A505; border-color: #DEE2B1; }
 
     .log-toggle-btn { display: none; } /* Скрыта на ПК */
+    /* --- Анимация всплывающих цифр --- */
+    .floating-text {
+    position: absolute;
+    top: 50%; /* Появляется по центру аватарки */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 900;
+    font-size: 24px;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+    animation: float-up-fade 1.2s ease-out forwards;
+}
 
+    @keyframes float-up-fade {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    20% { opacity: 1; transform: translate(-50%, -80%) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -150%) scale(1); }
+}
+
+    .float-dmg { color: #ff4d4d; }   /* Красный для урона */
+    .float-heal { color: #2ecc71; }  /* Зеленый для хила */
+    .float-crit { color: #FFD500; font-size: 28px; } /* Золотой для крита */
     /* Мелкие экраны (Телефоны) - Адаптация скролла и UX */
     @media (max-width: 767px) {
         body { padding: 4px; padding-bottom: 80px; /* Даем отступ снизу, чтобы липкая кнопка ничего не перекрывала */ }
@@ -400,6 +474,27 @@
         line-height: 1.4;
     }
     #toast.show { opacity: 1; top: 20px; }
+
+    /* --- Анимация начала боя (Драматичный въезд) --- */
+    @keyframes slide-in-left {
+        0% { transform: translateX(-150px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slide-in-right {
+        0% { transform: translateX(150px); opacity: 0; }
+        100% { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes vs-dramatic {
+        0% { transform: scale(0) rotate(-20deg); opacity: 0; }
+        60% { transform: scale(1.6) rotate(10deg); opacity: 1; }
+        100% { transform: scale(1) rotate(0); opacity: 1; }
+    }
+    
+    /* Классы, которые мы будем навешивать через JS */
+    .anim-slide-left { animation: slide-in-left 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .anim-slide-right { animation: slide-in-right 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    .anim-vs { animation: vs-dramatic 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
 </style>
 </head>
 <body>
@@ -516,16 +611,26 @@
                     <div class="player-stats">
                         <img id="p-avatar" class="avatar" src="" alt="Player">
                         <div id="p-name" style="color:#2c3e50">Игрок</div>
-                        <div class="bar-container"><div class="bar-text" id="p-hp-text">50/50</div><div id="p-hp-bar" class="hp-bar" style="width: 100%;"></div></div>
-                        <div class="bar-container"><div class="bar-text" id="p-res-text">10/10</div><div id="p-res-bar" class="res-energy" style="width: 100%;"></div></div>
-                        <div id="p-status" class="status-bar"></div>
+                        <div class="bar-container">
+                         <div id="p-hp-ghost" class="hp-ghost"></div> 
+                         <div id="p-hp-bar" class="hp-bar"></div>
+                         <div class="bar-text" id="p-hp-text">60/60</div></div>
+
+                            <div class="bar-container">
+                            <div class="bar-text" id="p-res-text">10/10</div>
+                            <div id="p-res-bar" class="res-energy" style="width: 100%;"></div></div>
+                            <div id="p-status" class="status-bar"></div>
                     </div>
-                    <div><h2 style="margin-top: 50px; font-size: 28px; color: #777;">VS</h2></div>
-                    <div class="bot-stats">
+                        <div id="vs-dramatic"><h2 style="margin-top: 50px; font-size: 32px; color: #FFD500; text-shadow: 0 0 10px rgba(209, 165, 5, 0.5), 0 2px 4px rgba(0,0,0,0.8); font-style: italic;">VS</h2></div>                    <div class="bot-stats">
                         <img id="b-avatar" class="avatar" src="" alt="Bot">
                         <div id="b-name" style="color:#8b0000">Вражина</div>
-                        <div class="bar-container"><div class="bar-text" id="b-hp-text">50/50</div><div id="b-hp-bar" class="hp-bar" style="width: 100%;"></div></div>
-                        <div class="bar-container"><div class="bar-text" id="b-res-text">10/10</div><div id="b-res-bar" class="res-energy" style="width: 100%;"></div></div>
+                        <div class="bar-container">
+                            <div id="b-hp-ghost" class="hp-ghost"></div> 
+                            <div id="b-hp-bar" class="hp-bar"></div>
+                            <div class="bar-text" id="b-hp-text">60/60</div></div>
+
+                        <div class="bar-container"><div class="bar-text" id="b-res-text">10/10</div>
+                        <div id="b-res-bar" class="res-energy" style="width: 100%;"></div></div>
                         <div id="b-status" class="status-bar"></div>
                     </div>
                 </div>
@@ -578,7 +683,7 @@
 <script>
     const ZONES = {1: "Голову", 2: "Грудь", 3: "Живот", 4: "Ноги"};
     
-const C_DATA = {
+    const C_DATA = {
         rogue: { hp: 60, res: "energy", minD: 4, maxD: 6, skills: [
             {id: "blind_powder", name: "😵 Ослепляющий порошок", cost: 4, type: "skill", desc: "Наносит 3 урона. 65% шанс ослепить врага (100% промах физ. атакой) и снять баффы."},
             {id: "sweep", name: "🎯 Подсечка", cost: 4, type: "skill", desc: "Наносит 3 урона. Накладывает Уязвимость (+15% получаемого урона) на 2 хода."}
@@ -644,6 +749,17 @@ const C_DATA = {
         "samurai": "Пассивка: 25% парировать атаку (-4 урона). Накапливает +2 урона за каждый ваш промах или удар в блок."
     };
 
+    function showFloatingText(targetId, text, type) {
+    const container = document.querySelector(targetId === "p-avatar" ? ".player-stats" : ".bot-stats");
+    const el = document.createElement("div");
+    el.className = `floating-text float-${type}`;
+    el.innerText = text;
+    container.appendChild(el);
+
+    // Удаляем элемент через 1.2 сек, когда закончится анимация
+    setTimeout(() => el.remove(), 1200);
+}
+
     class Fighter {
         constructor(name, fClass, gender, isBot) {
             let data = C_DATA[fClass];
@@ -682,21 +798,35 @@ const C_DATA = {
             this.dealtPhysDmgThisTurn = false;
             this.d20Rolled = false;
             this.skipBlock = false;
+            this.turnMaxDmg = 0;
+            this.turnMaxHeal = 0;
         }
 
         get logName() { return `${this.name} [${this.hp}/${this.maxHp}]`; }
         isAlive() { return this.hp > 0; }
         
-        takeDamage(amount) { this.hp = Math.max(0, this.hp - amount); }
+        takeDamage(amount) { 
+            if (amount > 0) {
+                this.hp = Math.max(0, this.hp - amount); 
+                // Запоминаем самый сильный удар
+                if (amount > this.turnMaxDmg) this.turnMaxDmg = amount;
+            }
+        }        
+        
         heal(amount) { 
-            // Логика Коронавируса (срез лечения)
             if(this.effects.healDebuff && this.effects.healDebuff.t > 0) {
                 let reduce = Math.min(amount, this.effects.healDebuff.a);
                 amount -= reduce;
                 this.effects.healDebuff.a -= reduce;
-                if (this.effects.healDebuff.a <= 0) this.effects.healDebuff.t = 0; // Снимаем, когда исчерпан
+                if (this.effects.healDebuff.a <= 0) this.effects.healDebuff.t = 0;
             }
-            this.hp = Math.min(this.maxHp, this.hp + amount); 
+            
+            let finalHeal = Math.min(this.maxHp - this.hp, amount);
+            if (finalHeal > 0) {
+                this.hp += finalHeal;
+                // Запоминаем самый большой отхил
+                if (finalHeal > this.turnMaxHeal) this.turnMaxHeal = finalHeal; 
+            }
         }
         
         addRes(amount) { 
@@ -767,10 +897,11 @@ const C_DATA = {
     }
 
     function updateStats() {
-        // --- ИМЯ И ПОДСКАЗКА ИГРОКА (Только пассивка) ---
+        // --- ИМЯ И ПОДСКАЗКА ИГРОКА ---
         let pInfo = CLASS_INFO[player.fClass];
         document.getElementById("p-name").innerHTML = `Игрок (<span title="${pInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][player.fClass]}</span>)`;
 
+        // --- ХП ИГРОКА (с фантомной полоской) ---
         document.getElementById("p-hp-text").innerText = `${player.hp}/${player.maxHp} HP`;
         let pBarCont = document.getElementById("p-hp-bar").parentElement;
         if (player.hp < player.lastHp) {
@@ -781,13 +912,16 @@ const C_DATA = {
         player.lastHp = player.hp;
         
         document.getElementById("p-hp-bar").style.width = `${(player.hp/player.maxHp)*100}%`;
+        document.getElementById("p-hp-ghost").style.width = `${(player.hp/player.maxHp)*100}%`;
+
+        // --- РЕСУРСЫ ИГРОКА ---
         document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
         document.getElementById("p-res-bar").className = player.resType==="energy" ? "res-energy" : "res-mana";
         document.getElementById("p-res-bar").style.width = `${(player.res/player.maxRes)*100}%`;
         document.getElementById("p-avatar").src = AVATARS[matchGender][player.fClass];
         renderStatuses(player, "p-status");
 
-        // --- ИМЯ И ПОДСКАЗКА ВРАГА (Пассивка + Активные навыки) ---
+        // --- ИМЯ И ПОДСКАЗКА ВРАГА ---
         let bInfo = CLASS_INFO[bot.fClass];
         let bs1 = C_DATA[bot.fClass].skills[0];
         let bs2 = C_DATA[bot.fClass].skills[1];
@@ -796,6 +930,7 @@ const C_DATA = {
         
         document.getElementById("b-name").innerHTML = `Вражина (<span title="${bFullInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][bot.fClass]}</span>)`;
 
+        // --- ХП ВРАГА (с фантомной полоской) ---
         document.getElementById("b-hp-text").innerText = `${bot.hp}/${bot.maxHp} HP`;
         let bBarCont = document.getElementById("b-hp-bar").parentElement;
         if (bot.hp < bot.lastHp) {
@@ -806,12 +941,16 @@ const C_DATA = {
         bot.lastHp = bot.hp;
         
         document.getElementById("b-hp-bar").style.width = `${(bot.hp/bot.maxHp)*100}%`;
+        document.getElementById("b-hp-ghost").style.width = `${(bot.hp/bot.maxHp)*100}%`;
+
+        // --- РЕСУРСЫ ВРАГА ---
         document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
         document.getElementById("b-res-bar").className = bot.resType==="energy" ? "res-energy" : "res-mana";
         document.getElementById("b-res-bar").style.width = `${(bot.res/bot.maxRes)*100}%`;
         document.getElementById("b-avatar").src = AVATARS[matchGender][bot.fClass];
         renderStatuses(bot, "b-status");
 
+        // --- ОБНОВЛЕНИЕ СПИСКА НАВЫКОВ И КНОПОК ---
         let html = `<label style="flex-direction: column; align-items: flex-start; text-align: left;">
             <div style="display: flex; align-items: center;">
                 <input type="radio" name="spell" value="none" checked> 
@@ -839,9 +978,12 @@ const C_DATA = {
             let dis = (player.res < s.cost || cd > 0) ? "disabled" : "";
             let cdTxt = cd > 0 ? ` <span style="color:#e74c3c; margin-left: 6px;">⏳ [КД: ${cd}]</span>` : "";
             
+            // Проверяем, был ли этот навык выбран до обновления
+            let isChecked = document.querySelector(`input[name="spell"][value="${s.id}"]`)?.checked ? "checked" : "";
+
             html += `<label class="${dis}" style="flex-direction: column; align-items: flex-start; text-align: left;">
                 <div style="display: flex; align-items: center;">
-                    <input type="radio" name="spell" value="${s.id}" ${dis?'disabled':''}> 
+                    <input type="radio" name="spell" value="${s.id}" ${dis?'disabled':''} ${isChecked}> 
                     <span style="font-weight: bold;">${s.name} (${s.cost} ${player.resType==='energy'?'Эн.':'Ман.'})</span>${cdTxt}
                 </div>
                 <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
@@ -851,17 +993,16 @@ const C_DATA = {
         });
 
         document.getElementById("skills-container").innerHTML = html;
-        // --- Управление VFX эффектами на аватарках (Приоритет: последний полученный) ---
+
+        // --- ПРИМЕНЕНИЕ VFX ЭФФЕКТОВ НА АВАТАРКИ ---
         function applyVFX(f, avatarId) {
             let avatar = document.getElementById(avatarId);
-            avatar.className = "avatar"; // Сброс всех эффектов до базового прямоугольника
+            avatar.className = "avatar"; 
             
-            // Если сохраненного эффекта уже нет (таймер вышел или сняли) - забываем его
             if (f.latestDebuff && (!f.effects[f.latestDebuff] || f.effects[f.latestDebuff].t <= 0)) {
                 f.latestDebuff = null;
             }
 
-            // Если последнего нет, ищем любой другой активный негативный статус
             if (!f.latestDebuff) {
                 const badStatuses = ["burn", "poison", "bleed", "curse", "ice", "dmgDebuff", "vuln", "exhaustion", "sunder", "sticky", "miasma"];
                 for (let d of badStatuses) {
@@ -872,9 +1013,7 @@ const C_DATA = {
                 }
             }
 
-            // Применяем CSS-класс, если нашли активный статус
             if (f.latestDebuff) {
-                // Группируем похожие дебаффы на слабость в одну анимацию
                 if (["dmgDebuff", "atkDebuff", "miasma"].includes(f.latestDebuff)) {
                     avatar.classList.add("avatar-debuff");
                 } else {
@@ -1127,6 +1266,9 @@ const C_DATA = {
         if (att.megaCrit) { dmg = Math.floor(dmg * 1.5); att.megaCrit = false; } // Мега-крит Берсерка
         else if (isCrit) dmg *= 2;
 
+        if (isCrit) {
+    showFloatingText(def.isBot ? "b-avatar" : "p-avatar", "КРИТ!", "crit");
+}
         if(isHalfDmg) dmg = Math.max(1, Math.floor(dmg / 2));
         
         let mit = applyMitigation(def, dmg, false, false, att);
@@ -1194,6 +1336,11 @@ const C_DATA = {
         let isCrit = caster.fClass === "mage" && Math.random() < caster.magicCritChance;
         let mult = isCrit ? 2 : 1;
         let cName = caster.logName;
+
+        // Если маг кританул навыком, показываем всплывающий текст над целью
+        if (isCrit) {
+            showFloatingText(target.isBot ? "b-avatar" : "p-avatar", "КРИТ!", "crit");
+        }
 
         if (skillId === "potion") {
             caster.hasPotion = false; 
@@ -1381,6 +1528,24 @@ const C_DATA = {
         document.getElementById("btn-fight").style.display = "block"; document.getElementById("btn-next").style.display = "none";
         document.getElementById("log-area").innerHTML = ""; 
         logMsg(`⚔️ Бой начался! Ваш противник: ${NAMES[matchGender][bot.fClass]}.`, "system");
+        // --- ДРАМАТИЧНЫЙ ВЪЕЗД ---
+        let pPan = document.querySelector('.player-stats');
+        let bPan = document.querySelector('.bot-stats');
+        let vsPan = document.getElementById('vs-dramatic');
+        
+        // 1. Снимаем классы (если это не первый бой)
+        pPan.classList.remove('anim-slide-left');
+        bPan.classList.remove('anim-slide-right');
+        vsPan.classList.remove('anim-vs');
+        
+        // 2. Фокус с перерисовкой DOM, чтобы анимация запустилась заново
+        void pPan.offsetWidth; 
+        
+        // 3. Вешаем классы обратно
+        pPan.classList.add('anim-slide-left');
+        bPan.classList.add('anim-slide-right');
+        vsPan.classList.add('anim-vs');
+        // -------------------------
         updateStats();
     }
 
@@ -1400,7 +1565,10 @@ const C_DATA = {
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
         player.d20Rolled = bot.d20Rolled = false;
         player.skipBlock = bot.skipBlock = false;
-        player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
+        
+        // Сбрасываем счетчики перед началом нового раунда
+        player.turnMaxDmg = 0; player.turnMaxHeal = 0;
+        bot.turnMaxDmg = 0; bot.turnMaxHeal = 0;
 
         if(!player.isAlive() || !bot.isAlive()) return checkGameOver();
 
@@ -1496,6 +1664,14 @@ const C_DATA = {
         });
 
         updateStats(); roundNum++;
+        
+        // --- ВЫВОДИМ ВСПЛЫВАЮЩИЕ ЦИФРЫ ОДИН РАЗ ЗА РАУНД ---
+        if (player.turnMaxDmg > 0) showFloatingText("p-avatar", `-${player.turnMaxDmg}`, "dmg");
+        if (player.turnMaxHeal > 0) showFloatingText("p-avatar", `+${player.turnMaxHeal} HP`, "heal");
+        
+        if (bot.turnMaxDmg > 0) showFloatingText("b-avatar", `-${bot.turnMaxDmg}`, "dmg");
+        if (bot.turnMaxHeal > 0) showFloatingText("b-avatar", `+${bot.turnMaxHeal} HP`, "heal");
+
         let rInp = document.querySelector('input[name="spell"][value="none"]'); if(rInp) rInp.checked = true;
         checkGameOver();
     }
