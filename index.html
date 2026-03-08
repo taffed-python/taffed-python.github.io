@@ -289,7 +289,7 @@
         /* Добавляем вызов анимации: */
         animation: log-slide-in 0.35s ease-out forwards; 
     }    
-    
+
     /* Подсветка текста в логе */
     .crit { color: #FFD500; font-weight: bold; } .hit { color: #fff; font-weight: 600;}
     .dodge { color: #a9dfbf; font-style: italic; } .block { color: #f39c12; font-weight: 600;}
@@ -495,6 +495,40 @@
     .anim-slide-right { animation: slide-in-right 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
     .anim-vs { animation: vs-dramatic 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
+/* --- Оверлей результатов боя --- */
+    #result-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(6, 54, 45, 0.85); /* Затемнение фона */
+        backdrop-filter: blur(5px); /* Размытие заднего плана */
+        display: flex; justify-content: center; align-items: center;
+        z-index: 3000;
+        opacity: 0; pointer-events: none;
+        transition: opacity 0.4s ease;
+    }
+    #result-overlay.show {
+        opacity: 1; pointer-events: all;
+    }
+    .result-box {
+        background: #06362D;
+        padding: 30px 20px;
+        border-radius: 16px;
+        border: 2px solid #D1A505;
+        text-align: center;
+        width: 85%; max-width: 380px;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(209, 165, 5, 0.2);
+        transform: scale(0.8) translateY(30px);
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #result-overlay.show .result-box {
+        transform: scale(1) translateY(0);
+    }
+    #result-title { font-size: 38px; margin-bottom: 8px; text-shadow: 0 4px 10px rgba(0,0,0,0.8); }
+    #result-desc { font-size: 15px; color: #DEE2B1; margin-bottom: 24px; font-weight: 500; }
+    
+    .res-win { color: #2ecc71 !important; text-shadow: 0 0 15px rgba(46, 204, 113, 0.5) !important; }
+    .res-lose { color: #e74c3c !important; text-shadow: 0 0 15px rgba(231, 76, 60, 0.5) !important; }
+    .res-draw { color: #FFD500 !important; }
+
 </style>
 </head>
 <body>
@@ -672,7 +706,6 @@
 
                 <div class="action-buttons">
                     <button id="btn-fight" onclick="playRound()">Сделать ход</button>
-                    <button id="btn-next" onclick="startNewBattle()" style="display:none;">Новый бой</button>
                     <button id="btn-switch" onclick="goToStartScreen()">Сменить класс</button>
                 </div>
             </div>
@@ -1517,17 +1550,32 @@
             startNewBattle();
         } catch (e) { alert("Ошибка!"); console.error(e); }
     }
-    function goToStartScreen() { document.getElementById("combat-screen").classList.remove("active"); document.getElementById("start-screen").classList.add("active"); }
+    function goToStartScreen() { 
+        document.getElementById("combat-screen").classList.remove("active"); 
+        document.getElementById("start-screen").classList.add("active"); 
+        document.getElementById("result-overlay").classList.remove("show");
+
+        document.getElementById("btn-fight").innerHTML = "Сделать ход";
+        document.getElementById("btn-fight").onclick = playRound;
+    }
 
     function startNewBattle() {
+        document.getElementById("result-overlay").classList.remove("show");
+
+        let btnFight = document.getElementById("btn-fight");
+        btnFight.innerHTML = "Сделать ход";
+        btnFight.onclick = playRound;
+        
         matchGender = Math.random() < 0.5 ? "male" : "female";
         player = new Fighter("Игрок", selectedClass, matchGender, false);
         let classes = ["rogue", "berserker", "mage", "paladin", "crossbowman", "plague_doctor", "warlock", "shieldbearer", "beekeeper", "samurai"];
         bot = new Fighter("Вражина", pickRandom(classes), matchGender, true);
         roundNum = 1;
-        document.getElementById("btn-fight").style.display = "block"; document.getElementById("btn-next").style.display = "none";
+        document.getElementById("btn-fight").style.display = "block"; 
+        
         document.getElementById("log-area").innerHTML = ""; 
         logMsg(`⚔️ Бой начался! Ваш противник: ${NAMES[matchGender][bot.fClass]}.`, "system");
+        
         // --- ДРАМАТИЧНЫЙ ВЪЕЗД ---
         let pPan = document.querySelector('.player-stats');
         let bPan = document.querySelector('.bot-stats');
@@ -1546,8 +1594,10 @@
         bPan.classList.add('anim-slide-right');
         vsPan.classList.add('anim-vs');
         // -------------------------
+        
         updateStats();
     }
+        updateStats();
 
     function playRound() {
         let pAtt = getRadioVal("attack", "1"); let pBlocks = getRadioVal("block", "1,2").split(","); let pSpell = getRadioVal("spell", "none");
@@ -1676,24 +1726,58 @@
         checkGameOver();
     }
 
+    function hideOverlay() {
+        document.getElementById("result-overlay").classList.remove("show");
+        
+        // Возвращаем кнопку действия, но превращаем её в кнопку возврата к итогам
+        let btnFight = document.getElementById("btn-fight");
+        btnFight.style.display = "block";
+        btnFight.innerHTML = "🏆 Вернуться к итогам";
+        btnFight.onclick = () => document.getElementById("result-overlay").classList.add("show");
+    }
+
     function checkGameOver() {
         if(!player.isAlive() || !bot.isAlive()) {
-            document.getElementById("btn-fight").style.display = "none"; // Прячем кнопку полностью
+            document.getElementById("btn-fight").style.display = "none";
             updateStats();
-            logMsg("<br>=== БОЙ ОКОНЧЕН ===", "system");
             
+            let overlay = document.getElementById("result-overlay");
+            let title = document.getElementById("result-title");
+            let desc = document.getElementById("result-desc");
+
             if(player.isAlive()) { 
-                logMsg("🏆 Вражина повержена. Вы победили!", "system"); 
+                title.innerHTML = "🏆 Победа!";
+                title.className = "res-win";
+                desc.innerHTML = `Вражеский ${NAMES[matchGender][bot.fClass]} повержен.`;
             } else if(bot.isAlive()) { 
-                logMsg("💀 Вы пали на арене...", "system"); 
+                title.innerHTML = "💀 Поражение";
+                title.className = "res-lose";
+                desc.innerHTML = "Вы пали на арене...";
             } else { 
-                logMsg("🤝 Ничья. Оба погибли.", "system"); 
+                title.innerHTML = "🤝 Ничья";
+                title.className = "res-draw";
+                desc.innerHTML = "Оба бойца рухнули замертво.";
             }
             
-            // Теперь кнопка появляется всегда, когда бой окончен
-            document.getElementById("btn-next").style.display = "block"; 
+            // Показываем окно с небольшой задержкой, чтобы игрок успел увидеть последний удар
+            setTimeout(() => {
+                overlay.classList.add("show");
+            }, 600);
         }
     }
 </script>
+<div id="result-overlay">
+    <div class="result-box">
+        <h1 id="result-title">🏆 Победа!</h1>
+        <div id="result-desc">Вражина повержена.</div>
+        
+        <button onclick="startNewBattle()" style="margin-bottom: 12px; background: #FFD500; color: #06362D; border: 2px solid #D1A505; font-size: 17px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">Следующий противник</button>
+        
+        <button onclick="goToStartScreen()" style="background: #155332; color: #DEE2B1; border: 2px solid #06362D; font-size: 14px; box-shadow: none;">Сменить класс</button>
+
+        <button onclick="hideOverlay()" style="background: transparent; color: #DEE2B1; border: none; font-size: 13px; margin-top: 10px; box-shadow: none; padding: 5px;">👀 Посмотреть лог боя</button>
+    </div>
+</div>
+</div>
 </body>
 </html>
