@@ -120,14 +120,78 @@
     }
     .player-stats, .bot-stats { width: 45%; display: flex; flex-direction: column; align-items: center; position: relative;}
     
+    /* --- АВАТАРКИ: Новая форма и размер --- */
     .avatar { 
-        width: 90px; height: 90px;
-        border-radius: 50%; background: #06362D; 
-        border: 3px solid #FFD500; /* Золотая рамка */
+        width: 105px; height: 105px; /* Увеличили размер (было 90px) */
+        border-radius: 18px; /* Мягкий прямоугольник вместо круга */
+        background: #06362D; 
+        border: 3px solid #FFD500; /* Золотая рамка по умолчанию */
         margin-bottom: 8px; object-fit: cover; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
         flex-shrink: 0; 
+        transition: all 0.4s ease; /* Плавное перетекание эффектов */
     }
+
+    /* --- VFX: Визуальные эффекты негативных статусов --- */
+    /* 1. Горение */
+    @keyframes vfx-burn {
+        0% { filter: drop-shadow(0 0 5px #ff4500) sepia(0.6) hue-rotate(-20deg); border-color: #ff4500; }
+        50% { filter: drop-shadow(0 0 20px #ff8c00) sepia(0.9) hue-rotate(-10deg); border-color: #ff8c00; }
+        100% { filter: drop-shadow(0 0 5px #ff4500) sepia(0.6) hue-rotate(-20deg); border-color: #ff4500; }
+    }
+    .avatar-burn { animation: vfx-burn 1.5s infinite ease-in-out; }
+
+   /* 2. Кровотечение (Мягкая пульсация) */
+    @keyframes vfx-bleed {
+        0%, 100% { filter: drop-shadow(0 0 2px #5a0000); border-color: #5a0000; }
+        20%, 40% { filter: drop-shadow(0 0 10px #a10000); border-color: #a10000; }
+        30% { filter: drop-shadow(0 0 5px #7a0000); border-color: #7a0000; }
+    }
+    .avatar-bleed { animation: vfx-bleed 2.5s infinite ease-in-out; }
+
+    /* 3. Яд */
+    @keyframes vfx-poison {
+        0% { filter: drop-shadow(0 0 5px #27ae60) hue-rotate(70deg) saturate(1.5); border-color: #27ae60; }
+        50% { filter: drop-shadow(0 0 15px #2ecc71) hue-rotate(90deg) saturate(2); border-color: #2ecc71; }
+        100% { filter: drop-shadow(0 0 5px #27ae60) hue-rotate(70deg) saturate(1.5); border-color: #27ae60; }
+    }
+    .avatar-poison { animation: vfx-poison 2s infinite ease-in-out; }
+
+    /* 4. Проклятие */
+    @keyframes vfx-curse {
+        0% { filter: drop-shadow(0 0 8px #4b0082) brightness(0.7); border-color: #4b0082; }
+        50% { filter: drop-shadow(0 0 20px #8a2be2) brightness(0.5); border-color: #8a2be2; }
+        100% { filter: drop-shadow(0 0 8px #4b0082) brightness(0.7); border-color: #4b0082; }
+    }
+    .avatar-curse { animation: vfx-curse 2.5s infinite ease-in-out; }
+
+    /* 5. Гололедица */
+    @keyframes vfx-ice {
+        0% { filter: drop-shadow(0 0 5px #2980b9) hue-rotate(180deg) brightness(1.2); border-color: #2980b9; }
+        50% { filter: drop-shadow(0 0 15px #3498db) hue-rotate(200deg) brightness(1.5); border-color: #3498db; }
+        100% { filter: drop-shadow(0 0 5px #2980b9) hue-rotate(180deg) brightness(1.2); border-color: #2980b9; }
+    }
+    .avatar-ice { animation: vfx-ice 3s infinite ease-in-out; }
+
+    /* 6. Липкие руки (Мёд) */
+    @keyframes vfx-sticky {
+        0% { filter: drop-shadow(0 0 5px #d35400) sepia(0.5); border-color: #d35400; }
+        50% { filter: drop-shadow(0 0 10px #f39c12) sepia(0.8); border-color: #f39c12; }
+        100% { filter: drop-shadow(0 0 5px #d35400) sepia(0.5); border-color: #d35400; }
+    }
+    .avatar-sticky { animation: vfx-sticky 2.5s infinite ease-in-out; }
+
+    /* 7. Уязвимость (Мигающий прицел) */
+    @keyframes vfx-vuln {
+        0%, 100% { filter: drop-shadow(0 0 5px #c0392b); border-color: #c0392b; }
+        50% { filter: drop-shadow(0 0 15px #e74c3c); border-color: #e74c3c; }
+    }
+    .avatar-vuln { animation: vfx-vuln 1s infinite ease-in-out; }
+
+    /* Статические дебаффы без пульсации */
+    .avatar-exhaustion { filter: brightness(0.6) saturate(0.2); border-color: #7f8c8d; } /* Истощение */
+    .avatar-sunder { filter: contrast(1.5) drop-shadow(0 0 8px #2c3e50); border-color: #2c3e50; border-style: dashed; } /* Раскол */
+    .avatar-debuff { filter: saturate(0.5) opacity(0.8); border-color: #95a5a6; } /* Любая слабость */
 
     .bar-container { width: 100%; background: #06362D; height: 16px; border-radius: 8px; margin-top: 5px; overflow: hidden; position: relative; border: 1px solid #D1A505;}
     .bar-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; font-weight: bold; text-shadow: 0 1px 2px #000; z-index: 2;}
@@ -174,8 +238,8 @@
     
     .options-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
     
-    /* Добавляем зазор в 8 пикселей между навыками! */
-    .options-column { display: flex; flex-direction: column; gap: 8px; } 
+    /* Добавляем зазор в 7 пикселей между навыками! */
+    .options-column { display: flex; flex-direction: column; gap: 7px; } 
     
     .control-box label { 
         display: flex; align-items: center; justify-content: center; /* Центрируем текст для красивых кнопок */
@@ -225,7 +289,7 @@
         /* Исправляем горизонтальный скролл на стартовом экране */
         .start-options { grid-template-columns: 1fr; gap: 8px; }
         
-        .avatar { width: 70px; height: 70px; } 
+        .avatar { width: 85px; height: 85px; border-radius: 14px; } 
         h1 { font-size: 20px; }
         .stats-panel { padding: 10px; }
         
@@ -282,7 +346,9 @@
         font-size: 14px; font-weight: 600; z-index: 9999;
         box-shadow: 0 5px 20px rgba(0,0,0,0.8);
         opacity: 0; transition: all 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); 
-        pointer-events: none; text-align: center; width: max-content; max-width: 90%;
+        pointer-events: none; width: max-content; max-width: 90%;
+        text-align: left; /* <-- Изменили выравнивание */
+        line-height: 1.4;
     }
     #toast.show { opacity: 1; top: 20px; }
 </style>
@@ -509,6 +575,19 @@
         female: { "rogue": "https://i.postimg.cc/SQBbBQFd/IMG-6251.png", "berserker": "https://i.postimg.cc/ryB2ByXH/IMG-6252.png", "mage": "https://i.postimg.cc/1Rk1kRhj/IMG-6253.png", "paladin": "https://i.postimg.cc/76jP4k82/paladin-f.png", "crossbowman": "https://i.postimg.cc/wvP9F4SR/crossbow-f.png", "plague_doctor": "https://i.postimg.cc/JnS78LVy/plague-doctor-f.png", "warlock": "https://i.postimg.cc/PfMJD5cy/Gemini_Generated_Image_urxn58urxn58urxn_(5).png", "shieldbearer": "https://i.postimg.cc/m22DyGWW/Gemini_Generated_Image_urxn58urxn58urxn_(6).png", "beekeeper": "https://i.postimg.cc/QCjMz2BL/Gemini_Generated_Image_urxn58urxn58urxn_(3).png", "samurai": "https://i.postimg.cc/KjmYW6Kh/Gemini_Generated_Image_urxn58urxn58urxn_(1).png" }
     };
 
+    const CLASS_INFO = {
+        "rogue": "Пассивка: 22% шанс увернуться. 30% шанс нанести двойной удар (50% урона, пробивает блок).",
+        "berserker": "Пассивка: +1 урон за каждые 12 потерянных HP. 25% шанс контрудара (лечит 3-4 ХП и вешает Кровотечение).",
+        "mage": "Пассивка: Атаки посохом наносят на 3 урона больше, если на враге висит любой дебафф.",
+        "paladin": "Пассивка: Удачный блок лечит 1-2 HP. 25% шанс добавить +3 урона магией света при любой атаке.",
+        "crossbowman": "Пассивка: 25% шанс прострелить колено (-2 урона врагу). Любой выстрел в блок наносит минимум 2 урона.",
+        "plague_doctor": "Пассивка: Удар лечит 1 ХП (по отравленному 2-3 ХП) и вешает Яд. 25% шанс отравить атакующего при получении урона.",
+        "warlock": "Пассивка: Успешная атака дает +1 к Проклятию. В конце хода лечит 1 HP, если враг проклят.",
+        "shieldbearer": "Пассивка: Любой получаемый урон снижен на 1. 25% шанс дополнительно заблокировать 3-4 урона.",
+        "beekeeper": "Пассивка: Атаки копят Рой (до 3). При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.",
+        "samurai": "Пассивка: 25% парировать атаку (-4 урона). Накапливает +2 урона за каждый ваш промах или удар в блок."
+    };
+
     class Fighter {
         constructor(name, fClass, gender, isBot) {
             let data = C_DATA[fClass];
@@ -600,28 +679,26 @@
         if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
         if(e.curse.t > 0) html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
         if(e.ice.t > 0) html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
-        if(e.blind.t > 0) html += `<span class="status-badge sb-blind" title="Ослепление: 100% промах физ. атакой." ${oc}>🌫️ 1</span>`;
         if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>📉 ${e.dmgDebuff.t}</span>`;
-        if(e.atkDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Сила атаки снижена на ${e.atkDebuff.a}. Ходов: ${e.atkDebuff.t}" ${oc}>🤕 ${e.atkDebuff.t}</span>`;
         if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
         if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>✨ ${e.thorns.t}</span>`;
         if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
         if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
-        if(e.shield.t > 0) html += `<span class="status-badge sb-shield" title="Щит Маны: отражает 50% урона." ${oc}>🛡️</span>`;
         if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
         if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🔋 ${e.exhaustion.t}</span>`;
         if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
         if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
         if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
-        if(e.unblockable.t > 0) html += `<span class="status-badge sb-buff" title="Стойка тени: Следующий удар неблокируемый." ${oc}>👺 1</span>`;
-        if(e.pacified.t > 0) html += `<span class="status-badge sb-shield" style="background:#4a235a;" title="Броня Неназываемого: Атака пропущена, получаемый урон снижен на 65%." ${oc}>🌑 1</span>`;
         if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
         
         document.getElementById(containerId).innerHTML = html;
     }
 
     function updateStats() {
-        document.getElementById("p-name").innerText = `Игрок (${NAMES[matchGender][player.fClass]})`;
+        // --- ИМЯ И ПОДСКАЗКА ИГРОКА (Только пассивка) ---
+        let pInfo = CLASS_INFO[player.fClass];
+        document.getElementById("p-name").innerHTML = `Игрок (<span title="${pInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][player.fClass]}</span>)`;
+
         document.getElementById("p-hp-text").innerText = `${player.hp}/${player.maxHp} HP`;
         document.getElementById("p-hp-bar").style.width = `${(player.hp/player.maxHp)*100}%`;
         document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
@@ -630,7 +707,17 @@
         document.getElementById("p-avatar").src = AVATARS[matchGender][player.fClass];
         renderStatuses(player, "p-status");
 
-        document.getElementById("b-name").innerText = `Вражина (${NAMES[matchGender][bot.fClass]})`;
+        // --- ИМЯ И ПОДСКАЗКА ВРАГА (Пассивка + Активные навыки) ---
+        let bInfo = CLASS_INFO[bot.fClass];
+        let bs1 = C_DATA[bot.fClass].skills[0];
+        let bs2 = C_DATA[bot.fClass].skills[1];
+        let bRes = bot.resType === "energy" ? "Эн." : "Ман.";
+        
+        // Склеиваем пассивку и скиллы (символ &#10; делает красивый перенос строки)
+        let bFullInfo = `${bInfo}&#10;&#10;✨ НАВЫКИ ВРАГА:&#10;🔸 ${bs1.name} (${bs1.cost} ${bRes}): ${bs1.desc}&#10;🔸 ${bs2.name} (${bs2.cost} ${bRes}): ${bs2.desc}`;
+        
+        document.getElementById("b-name").innerHTML = `Вражина (<span title="${bFullInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][bot.fClass]}</span>)`;
+
         document.getElementById("b-hp-text").innerText = `${bot.hp}/${bot.maxHp} HP`;
         document.getElementById("b-hp-bar").style.width = `${(bot.hp/bot.maxHp)*100}%`;
         document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
@@ -678,6 +765,40 @@
         });
         
         document.getElementById("skills-container").innerHTML = html;
+        // --- Управление VFX эффектами на аватарках (Приоритет: последний полученный) ---
+        function applyVFX(f, avatarId) {
+            let avatar = document.getElementById(avatarId);
+            avatar.className = "avatar"; // Сброс всех эффектов до базового прямоугольника
+            
+            // Если сохраненного эффекта уже нет (таймер вышел или сняли) - забываем его
+            if (f.latestDebuff && (!f.effects[f.latestDebuff] || f.effects[f.latestDebuff].t <= 0)) {
+                f.latestDebuff = null;
+            }
+
+            // Если последнего нет, ищем любой другой активный негативный статус
+            if (!f.latestDebuff) {
+                const badStatuses = ["burn", "poison", "bleed", "curse", "ice", "dmgDebuff", "vuln", "exhaustion", "sunder", "sticky", "miasma"];
+                for (let d of badStatuses) {
+                    if (f.effects[d] && f.effects[d].t > 0) {
+                        f.latestDebuff = d;
+                        break;
+                    }
+                }
+            }
+
+            // Применяем CSS-класс, если нашли активный статус
+            if (f.latestDebuff) {
+                // Группируем похожие дебаффы на слабость в одну анимацию
+                if (["dmgDebuff", "atkDebuff", "miasma"].includes(f.latestDebuff)) {
+                    avatar.classList.add("avatar-debuff");
+                } else {
+                    avatar.classList.add("avatar-" + f.latestDebuff);
+                }
+            }
+        }
+        
+        applyVFX(player, "p-avatar");
+        applyVFX(bot, "b-avatar");
     }
 
     function applyMitigation(def, dmg, isDot, isMagic, att = null) {
@@ -725,6 +846,13 @@
         } else {
             realTarget.effects[type] = { t: t, a: a };
         }
+
+        // --- НОВАЯ ЛОГИКА: Запоминаем последний негативный статус ---
+        const badStatuses = ["burn", "poison", "bleed", "curse", "ice", "dmgDebuff", "vuln", "exhaustion", "sunder", "sticky", "miasma"];
+        if (badStatuses.includes(type)) {
+            realTarget.latestDebuff = type;
+        }
+
         return msg;
     }
     function applyVuln(target, dmg) {
