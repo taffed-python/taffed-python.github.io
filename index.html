@@ -593,7 +593,7 @@ const C_DATA = {
         ]},
         paladin: { hp: 60, res: "mana", minD: 4, maxD: 6, skills: [
             {id: "punish", name: "⛓️ Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Если враг ставит блок, он поглотит только физическую часть."},
-            {id: "oath", name: "✨ Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
+            {id: "oath", name: "♱ Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
         ]},
         crossbowman: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
             {id: "lucky_strike", name: "🏹 Lucky Strike", cost: 4, type: "skill", desc: "2 урона в блок, либо от 2 до 14 урона по открытой цели."},
@@ -747,15 +747,18 @@ const C_DATA = {
         let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
         
         if(e.burn.t > 0) html += `<span class="status-badge sb-burn" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>🔥 ${e.burn.t}</span>`;
-        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>⚗️ ${e.poison.t}</span>`;        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
+        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>⚗️ ${e.poison.t}</span>`;        
+        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
         if(e.curse.t > 0) html += `<span class="status-badge sb-curse" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
         if(e.ice.t > 0) html += `<span class="status-badge sb-ice" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
-        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>⛓️ ${e.dmgDebuff.t}</span>`;        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
-        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>✨ ${e.thorns.t}</span>`;
+        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>⛓️ ${e.dmgDebuff.t}</span>`;        
+        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
+        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>♱ ${e.thorns.t}</span>`;
         if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
         if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
         if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
-        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🪫 ${e.exhaustion.t}</span>`;        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
+        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🪫 ${e.exhaustion.t}</span>`;        
+        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
         if(f.swarm > 0) html += `<span class="status-badge sb-buff" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
         if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
         if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
@@ -789,7 +792,7 @@ const C_DATA = {
         let bs1 = C_DATA[bot.fClass].skills[0];
         let bs2 = C_DATA[bot.fClass].skills[1];
         let bRes = bot.resType === "energy" ? "Эн." : "Ман.";
-        let bFullInfo = `${bInfo}&#10;&#10;✨ НАВЫКИ ВРАГА:&#10;🔸 ${bs1.name} (${bs1.cost} ${bRes}): ${bs1.desc}&#10;🔸 ${bs2.name} (${bs2.cost} ${bRes}): ${bs2.desc}`;
+        let bFullInfo = `${bInfo}&#10;&#10;♱ НАВЫКИ ВРАГА:&#10;🔸 ${bs1.name} (${bs1.cost} ${bRes}): ${bs1.desc}&#10;🔸 ${bs2.name} (${bs2.cost} ${bRes}): ${bs2.desc}`;
         
         document.getElementById("b-name").innerHTML = `Вражина (<span title="${bFullInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][bot.fClass]}</span>)`;
 
@@ -1084,7 +1087,7 @@ const C_DATA = {
                 } else {
                     let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
                     if (def.fClass === "paladin") {
-                        let healAmt = getRnd(1, 2); def.heal(healAmt); blockMsg += ` ✨ Свет лечит на ${healAmt} HP!`;
+                        let healAmt = getRnd(1, 2); def.heal(healAmt); blockMsg += ` ♱ Свет лечит на ${healAmt} HP!`;
                         if(def.effects.thorns.t > 0) { let r = dealSkillDamage(def, att, 3, true); blockMsg += ` ⚡ Шипы бьют (${r.dmg} ур)!${r.msg}`; }
                     }
                     return [d20Msg + blockMsg, "block"];
@@ -1226,7 +1229,7 @@ const C_DATA = {
             caster.effects.shield = {t:1}; logMsg(`🛡️ ${cName} возводит Щит Маны! Отражает 50% урона и ВСЕ дебаффы обратно во врага.`, "spell"); return;
         }
         if(skillId === "oath") {
-            caster.effects.thorns = {t:2}; logMsg(`✨ ${cName} приносит Святую Клятву! Блоки усилены и отражают урон.`, "spell"); return;
+            caster.effects.thorns = {t:2}; logMsg(`♱ ${cName} приносит Святую Клятву! Блоки усилены и отражают урон.`, "spell"); return;
         }
         
         if(skillId === "sharpen") {
