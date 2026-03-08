@@ -122,14 +122,14 @@
     
     /* --- АВАТАРКИ: Новая форма и размер --- */
     .avatar { 
-        width: 105px; height: 105px; /* Увеличили размер (было 90px) */
-        border-radius: 18px; /* Мягкий прямоугольник вместо круга */
+        width: 115px; height: 115px; /* Увеличили на 10% (было 105px) */
+        border-radius: 18px; 
         background: #06362D; 
-        border: 3px solid #FFD500; /* Золотая рамка по умолчанию */
+        border: 3px solid #FFD500; 
         margin-bottom: 8px; object-fit: cover; 
         box-shadow: 0 4px 12px rgba(0,0,0,0.5); 
         flex-shrink: 0; 
-        transition: all 0.4s ease; /* Плавное перетекание эффектов */
+        transition: all 0.4s ease; 
     }
 
     /* --- VFX: Визуальные эффекты негативных статусов --- */
@@ -289,7 +289,7 @@
         /* Исправляем горизонтальный скролл на стартовом экране */
         .start-options { grid-template-columns: 1fr; gap: 8px; }
         
-        .avatar { width: 85px; height: 85px; border-radius: 14px; } 
+        .avatar { width: 95px; height: 95px; border-radius: 14px; } /* Увеличили на 10% (было 85px) */
         h1 { font-size: 20px; }
         .stats-panel { padding: 10px; }
         
@@ -453,6 +453,9 @@
                     <b>Стойка тени (3 Энергии):</b> Восстанавливает 3 энергии. Ваш следующий удар нельзя заблокировать.
                 </div></div>
             </label>
+            <div style="text-align: center; color: #DEE2B1; font-size: 13.5px; margin-top: 15px; font-style: italic;">
+            🎲 *В бою с вероятностью 5% может произойти что-то хорошее или что-то плохое, уникальное для каждого класса.
+        </div>
         </div>
         
     </div>
@@ -617,23 +620,38 @@
                 ice: {t:0}, blind: {t:0}, thorns: {t:0}, regen: {t:0, a:0}, 
                 atkDebuff: {t:0, a:0}, dmgDebuff: {t:0, a:0}, sharpen: {c:0}, shield: {t:0}, vuln: {t:0, a:0},
                 exhaustion: {t:0, a:0}, sunder: {t:0, a:0}, sticky: {t:0, a:0}, unblockable: {t:0},
-                pacified: {t:0}, miasma: {t:0}
+                pacified: {t:0}, miasma: {t:0},
+                healDebuff: {t:0, a:0}, bonusRegen: {t:0, a:0}, weakBlock: {t:0, a:0}
             };
             this.samuraiBonus = 0;
-            this.swarm = 0; // Накопление роя
+            this.swarm = 0;
             this.dealtPhysDmgThisTurn = false;
+            this.d20Rolled = false;
+            this.skipBlock = false;
         }
 
         get logName() { return `${this.name} [${this.hp}/${this.maxHp}]`; }
         isAlive() { return this.hp > 0; }
         
         takeDamage(amount) { this.hp = Math.max(0, this.hp - amount); }
-        heal(amount) { this.hp = Math.min(this.maxHp, this.hp + amount); }
+        heal(amount) { 
+            // Логика Коронавируса (срез лечения)
+            if(this.effects.healDebuff && this.effects.healDebuff.t > 0) {
+                let reduce = Math.min(amount, this.effects.healDebuff.a);
+                amount -= reduce;
+                this.effects.healDebuff.a -= reduce;
+                if (this.effects.healDebuff.a <= 0) this.effects.healDebuff.t = 0; // Снимаем, когда исчерпан
+            }
+            this.hp = Math.min(this.maxHp, this.hp + amount); 
+        }
         
         addRes(amount) { 
+            // Логика Выброса адреналина (бонус от Разбойника)
+            if (this.effects.bonusRegen && this.effects.bonusRegen.t > 0) amount += this.effects.bonusRegen.a;
+            
             if (amount > 0 && this.effects.exhaustion.t > 0) {
-                let reduced = amount * (1 - this.effects.exhaustion.a); // Вычитаем процент
-                amount = Math.max(1, Math.round(reduced)); // Не меньше 1
+                let reduced = amount * (1 - this.effects.exhaustion.a);
+                amount = Math.max(1, Math.round(reduced));
             }
             this.res = Math.min(this.maxRes, this.res + amount); 
         }
@@ -881,6 +899,91 @@
         if(att.effects.pacified.t > 0) {
             return [`🌑 ${att.logName} укрыт Броней Неназываемого и не совершает атаку.`, "system"];
         }
+        // --- 🎲 D20 МЕХАНИКА (СВЕЗЛО / ЗАПАДЛО) ---
+        let d20Msg = "";
+        let d20DmgBonus = 0;
+        if (!att.d20Rolled && !isSwarm) {
+            att.d20Rolled = true;
+            let roll = Math.random();
+            let isBasic = (fixedDmg === null);
+
+            if (roll < 0.05) { // 🟢 5% СВЕЗЛО
+                if (att.fClass === "rogue") {
+                    att.effects.bonusRegen = {t: 2, a: 3};
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Выброс адреналина: регенерация энергии +3 на 2 хода!</span><br>`;
+                } else if (att.fClass === "berserker") {
+                    att.megaCrit = true;
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Мега-крит: урон будет умножен на 1.5!</span><br>`;
+                } else if (att.fClass === "mage") {
+                    if (isBasic) d20DmgBonus += 2;
+                    applyStatus(att, def, "ice", 1);
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Посохом в глазень! +2 урона, враг приложил холодное на ушиб, 50% промаха (Лед)!</span><br>`;
+                } else if (att.fClass === "paladin") {
+                    let amt = getRnd(2, 3);
+                    att.maxHp += amt; att.heal(amt);
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Слава Иису! Макс. HP и здоровье увеличены на ${amt}!</span><br>`;
+                } else if (att.fClass === "crossbowman") {
+                    att.headshot = true;
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Стрелой в лоб! Если не в блок — враг получит Уязвимость!</span><br>`;
+                } else if (att.fClass === "plague_doctor") {
+                    let hDebuff = getRnd(4, 5);
+                    applyStatus(att, def, "healDebuff", 99, hDebuff); // Срез лечения на врага
+                    att.effects.regen = {t: 2, a: 2}; // Вешаем на себя Регенерацию
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Коронавирус! Следующее лечение врага снижено на ${hDebuff}, а Доктор получает Регенерацию (+2 HP) на 2 хода!</span><br>`;
+                
+                } else if (att.fClass === "warlock") {
+                    let curseBoost = getRnd(3, 4);
+                    applyStatus(att, def, "curse", 2, curseBoost, true);
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Продал душу демонам! Урон Проклятия мгновенно усилен на +${curseBoost}!</span><br>`;
+                } else if (att.fClass === "shieldbearer") {
+                    if (isBasic) d20DmgBonus += 2;
+                    applyStatus(att, def, "vuln", 2, 0.15);
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Сбил с ног! +2 урона и Уязвимость врагу на 2 хода!</span><br>`;
+                } else if (att.fClass === "beekeeper") {
+                    att.swarm = 3;
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Пчеломатка атакует! Рой мгновенно вырастает до максимума (3)!</span><br>`;
+                } else if (att.fClass === "samurai") {
+                    if (isBasic) d20DmgBonus += 2;
+                    let resBurn = getRnd(2, 3); def.res = Math.max(0, def.res - resBurn);
+                    d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Духи предков помогают в бою: +2 урона и сожжено ${resBurn} энергии врага!</span><br>`;
+                }
+            } else if (roll < 0.10) { // 🔴 5% ЗАПАДЛО (от 0.05 до 0.10)
+                if (att.fClass === "rogue") {
+                    isHalfDmg = true;
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Из трясущихся рук выскользывает кинжал! Урон снижен на 50%!</span><br>`;
+                } else if (att.fClass === "berserker") {
+                    applyStatus(att, att, "bleed", 2, 2, true);
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перестарался! Берсерк вешает на себя Кровотечение (2 ур/2 хода)!</span><br>`;
+                } else if (att.fClass === "mage") {
+                    att.takeDamage(2); att.res = Math.max(0, att.res - 1);
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перегрев посоха! Маг получает 2 урона и теряет 1 ману!</span><br>`;
+                } else if (att.fClass === "paladin") {
+                    att.takeDamage(2); att.effects.weakBlock = {t: 1, a: 2};
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Боги гневаются! Молния с неба наносит 2 урона, следующий блок пропустит 2 урона!</span><br>`;
+                } else if (att.fClass === "crossbowman") {
+                    if (isBasic) att.crossbowJam = true;
+                    let eLoss = getRnd(2, 3); att.res = Math.max(0, att.res - eLoss);
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Осечка! Потеряно ${eLoss} энергии, урон не больше 1!</span><br>`;
+                } else if (att.fClass === "plague_doctor") {
+                    att.skipBlock = true;
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Госпитализация! Доктор 100% провалит свой блок в этом ходу!</span><br>`;
+                } else if (att.fClass === "warlock") {
+                    let hpLoss = getRnd(2, 3);
+                    att.maxHp -= hpLoss; att.hp = Math.min(att.hp, att.maxHp);
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Оплата долгов! Платит кровью и навсегда теряет ${hpLoss} Макс. HP!</span><br>`;
+                } else if (att.fClass === "shieldbearer") {
+                    applyStatus(att, att, "weakBlock", 2, 0.5); 
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Уронил щит на ногу! 2 хода любой блок режет урон лишь на 50%!</span><br>`;
+                } else if (att.fClass === "beekeeper") {
+                    att.takeDamage(2); att.swarm = 0;
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Пчелы взбунтовались! Укусили хозяина на 2 урона, Рой разлетелся!</span><br>`;
+                } else if (att.fClass === "samurai") {
+                    d20DmgBonus -= 2; applyStatus(att, att, "sunder", 1, 0.5);
+                    d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Перепил саке? Получи леща от жены. Урон снижен на 2, шанс провала блока 50%!</span><br>`;
+                }
+            }
+        }
+        // ------------------------------------------
         let zoneText = `<u>${ZONES[aZone].toLowerCase()}</u>`;
         let verb = att.fClass==="rogue"?"вонзает кинжал в":att.fClass==="berserker"?"рубит в":att.fClass==="paladin"?"бьет молотом в":att.fClass==="crossbowman"?"стреляет в":att.fClass==="plague_doctor"?"режет скальпелем в":att.fClass==="shieldbearer"?"бьет щитом в":att.fClass==="samurai"?"рубит катаной в":"бьет посохом в";
         if (isSwarm) verb = "напускает рой на";
@@ -895,75 +998,61 @@
             return [`🧊 ${att.logName} поскальзывается на льду! Промах!`, "dodge"];
         }
 
+        if(att.effects.sticky.t > 0 && Math.random() < att.effects.sticky.a) return [d20Msg + `🍯 Липкие руки мешают! ${att.logName} промахивается!`, "dodge"];
+        if(att.effects.blind.t > 0) { att.effects.blind.t = 0; return [d20Msg + `🌫️ Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"]; }
+        if(att.effects.ice.t > 0 && Math.random() < 0.5) return [d20Msg + `🧊 ${att.logName} поскальзывается на льду! Промах!`, "dodge"];
+
         let isBlocked = bZones.includes(aZone.toString());
         let pierceMsg = "";
         
-        // Логика Раскола (от Щитоносца)
-        if (isBlocked && def.effects.sunder.t > 0 && Math.random() < def.effects.sunder.a) {
-            isBlocked = false; pierceMsg = " 💔 Раскол пробивает блок!";
-        }
-
-        // Логика Стойки тени (100% пробитие)
-        if (att.effects.unblockable && att.effects.unblockable.t > 0) {
-            isBlocked = false;
-            pierceMsg = " 👺 Удар из тени игнорирует блок!";
-            att.effects.unblockable.t = 0; // Снимаем заряд
-        }
-
-        // Логика Миазмов (50% шанс пробить)
-        if (isBlocked && att.fClass === "plague_doctor" && att.effects.miasma.t > 0 && Math.random() < 0.5) {
-            isBlocked = false;
-            pierceMsg = " 🧪 Токсичные испарения обходят блок!";
-        }
+        if (def.skipBlock) { isBlocked = false; pierceMsg = " 🏥 Госпитализация! Блок провален!"; def.skipBlock = false; }
+        if (isBlocked && def.effects.sunder.t > 0 && Math.random() < def.effects.sunder.a) { isBlocked = false; pierceMsg = " 💔 Раскол пробивает блок!"; }
+        if (att.effects.unblockable && att.effects.unblockable.t > 0) { isBlocked = false; pierceMsg = " 👺 Удар из тени игнорирует блок!"; att.effects.unblockable.t = 0; }
+        if (isBlocked && att.fClass === "plague_doctor" && att.effects.miasma.t > 0 && Math.random() < 0.5) { isBlocked = false; pierceMsg = " 🧪 Токсичные испарения обходят блок!"; }
 
         if(isBlocked && !ignoreBlock) {
-            if (att.fClass === "crossbowman" && fixedDmg === null) {
-                fixedDmg = 2; 
-                pierceMsg = " 💥 Тяжелый арбалетный болт пробивает даже блок!";
-            } else if (att.fClass === "samurai" && att.effects.sharpen.c > 0) {
-                isHalfDmg = true; // Режем урон пополам, но пропускаем удар
-                pierceMsg = " 🔪 Заточенный клинок прорезает блок наполовину!";
-            } else {
-                let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
-                if (def.fClass === "paladin") {
-                    let healAmt = getRnd(1, 2);
-                    def.heal(healAmt); blockMsg += ` ✨ Свет лечит на ${healAmt} HP!`;
-                    if(def.effects.thorns.t > 0) {
-                        let r = dealSkillDamage(def, att, 3, true); 
-                        blockMsg += ` ⚡ Святые шипы бьют атакующего (${r.dmg} ур)!${r.msg}`;
-                    }
+            // D20: Штрафы на блок Паладина и Щитоносца
+            if (def.effects.weakBlock && def.effects.weakBlock.t > 0) {
+                if (def.effects.weakBlock.a === 2) {
+                    let pDmg = Math.min(fixedDmg !== null ? fixedDmg : att.maxDmg, 2);
+                    def.takeDamage(pDmg); def.effects.weakBlock.t = 0;
+                    return [d20Msg + `🛡️ ${def.logName} блокирует, но Божий гнев пропустил ${pDmg} урона!`, "hit"];
+                } else if (def.effects.weakBlock.a === 0.5) {
+                    isHalfDmg = true; pierceMsg = " 🛡️ Травма: блок поглотил лишь половину урона!"; isBlocked = false; 
                 }
-                return [blockMsg, "block"];
             }
-        } else if (isBlocked && ignoreBlock) {
-            pierceMsg = " 💥 Блок обойден!";
-        }
+            if (isBlocked) {
+                if (att.fClass === "crossbowman" && fixedDmg === null) {
+                    fixedDmg = 2; pierceMsg = " 💥 Тяжелый болт пробивает даже блок!";
+                } else if (att.fClass === "samurai" && att.effects.sharpen.c > 0) {
+                    isHalfDmg = true; pierceMsg = " 🔪 Заточенный клинок прорезает блок наполовину!";
+                } else {
+                    let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
+                    if (def.fClass === "paladin") {
+                        let healAmt = getRnd(1, 2); def.heal(healAmt); blockMsg += ` ✨ Свет лечит на ${healAmt} HP!`;
+                        if(def.effects.thorns.t > 0) { let r = dealSkillDamage(def, att, 3, true); blockMsg += ` ⚡ Шипы бьют (${r.dmg} ур)!${r.msg}`; }
+                    }
+                    return [d20Msg + blockMsg, "block"];
+                }
+            }
+        } else if (isBlocked && ignoreBlock) { pierceMsg = " 💥 Блок обойден!"; }
 
-        if(def.fClass === "rogue" && def.effects.blind.t===0 && Math.random() < def.dodgeChance) {
-            def.addRes(1); return [`💨 ${def.logName} перекатом уходит от атаки! (+1 Энергия)`, "dodge"];
-        }
+        if(def.fClass === "rogue" && def.effects.blind.t===0 && Math.random() < def.dodgeChance) { def.addRes(1); return [d20Msg + `💨 ${def.logName} перекатом уходит от атаки! (+1 Эн.)`, "dodge"]; }
 
         let gainMsg = "";
-        if (!isSwarm) {
-            att.dealtPhysDmgThisTurn = true;
-            att.addRes(1); 
-            gainMsg = " ⚡ (+1 рес.)";
-        }
+        if (!isSwarm) { att.dealtPhysDmgThisTurn = true; att.addRes(1); gainMsg = " ⚡ (+1 рес.)"; }
 
         let dmg = fixedDmg !== null ? fixedDmg : getRnd(att.minDmg, att.maxDmg);
-        
+        dmg += d20DmgBonus; // Бонус от СВЕЗЛО
+        if (att.crossbowJam) dmg = Math.min(1, Math.max(0, dmg)); // Штраф Арбалетчика
+
         if (att.fClass === "mage" && def.hasAnyDebuff()) { dmg += 3; verb = "бьет светящимся посохом в"; }
         if (att.fClass === "samurai" && fixedDmg === null) {
             dmg += att.samuraiBonus;
-            if (att.effects.sharpen.c > 0) { 
-                dmg += 5; 
-                att.effects.sharpen.c--; 
-                gainMsg += " 🔪 Смертельная сталь (+5)!"; 
-            }
+            if (att.effects.sharpen.c > 0) { dmg += 5; att.effects.sharpen.c--; gainMsg += " 🔪 Смертельная сталь (+5)!"; }
         }
         if (att.fClass === "berserker" && fixedDmg === null) {
-            let missing = att.maxHp - att.hp;
-            let fury = Math.floor(missing / 12);
+            let fury = Math.floor((att.maxHp - att.hp) / 12);
             if(fury > 0) { dmg += fury; gainMsg += ` 😡 Ярость (+${fury})!`; }
         }
 
@@ -971,14 +1060,18 @@
         if(att.effects.atkDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.atkDebuff.a);
 
         let isCrit = att.fClass === "berserker" && Math.random() < att.critChance;
-        if(isCrit) dmg *= 2;
+        if (att.megaCrit) { dmg = Math.floor(dmg * 1.5); att.megaCrit = false; } // Мега-крит Берсерка
+        else if (isCrit) dmg *= 2;
+
         if(isHalfDmg) dmg = Math.max(1, Math.floor(dmg / 2));
         
         let mit = applyMitigation(def, dmg, false, false, att);
-        let finalDmg = mit.finalDmg;
+        let finalDmg = applyVuln(def, mit.finalDmg);
 
-        finalDmg = applyVuln(def, finalDmg);
-        
+        // Хэдшот Арбалетчика
+        if (!isBlocked && att.headshot && fixedDmg === null) {
+            applyStatus(att, def, "vuln", 2, 0.15); att.headshot = false; gainMsg += " 🎯 Хэдшот! Враг уязвим!";
+        }        
         // --- ВСТАВИТЬ РОСТ РОЯ СЮДА ---
         if (att.fClass === "beekeeper" && fixedDmg === null && finalDmg > 0) {
             att.swarm = Math.min(3, att.swarm + 1);
@@ -997,8 +1090,8 @@
             def.takeDamage(finalDmg);
         }
         
-        let msg = isCrit ? `💥 КРИТ! ${att.logName} пробивает ${zoneText}. Урон: ${finalDmg}!${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}` 
-                         : `⚔️ ${att.logName} ${verb} ${zoneText}. Урон: ${finalDmg}.${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}`;
+        let msg = d20Msg + (isCrit ? `💥 КРИТ! ${att.logName} пробивает ${zoneText}. Урон: ${finalDmg}!${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}` 
+                         : `⚔️ ${att.logName} ${verb} ${zoneText}. Урон: ${finalDmg}.${pierceMsg}${mit.logTxt}${reflectMsg}${gainMsg}`);
 
         if(att.fClass === "paladin" && Math.random() < 0.25) {
             let r = dealSkillDamage(att, def, 3, true);
@@ -1033,7 +1126,6 @@
         }
         return [msg, isCrit?"crit":"hit"];
     }
-
     function processSkill(caster, target, skillId, aZone, bZones) {
         let isCrit = caster.fClass === "mage" && Math.random() < caster.magicCritChance;
         let mult = isCrit ? 2 : 1;
@@ -1221,6 +1313,9 @@
 
         logMsg(`<br>[--- РАУНД ${roundNum} ---]`, "system");
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
+        player.d20Rolled = bot.d20Rolled = false;
+        player.skipBlock = bot.skipBlock = false;
+        player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
 
         if(!player.isAlive() || !bot.isAlive()) return checkGameOver();
 
@@ -1308,6 +1403,9 @@
             if(f.effects.sticky.t>0) f.effects.sticky.t--;
             if(f.effects.pacified.t>0) f.effects.pacified.t--;
             if(f.effects.miasma.t>0) f.effects.miasma.t--;
+            if(f.effects.healDebuff.t>0 && f.effects.healDebuff.t !== 99) f.effects.healDebuff.t--;
+            if(f.effects.bonusRegen.t>0) f.effects.bonusRegen.t--;
+            if(f.effects.weakBlock.t>0) f.effects.weakBlock.t--;
 
             for(let k in f.cooldowns) if(f.cooldowns[k]>0) f.cooldowns[k]--;
         });
