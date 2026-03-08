@@ -907,7 +907,7 @@
             let roll = Math.random();
             let isBasic = (fixedDmg === null);
 
-            if (roll < 0.05) { // 🟢 5% СВЕЗЛО
+            if (roll < 0.025) { // 🟢 2.5% СВЕЗЛО
                 if (att.fClass === "rogue") {
                     att.effects.bonusRegen = {t: 2, a: 3};
                     d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Выброс адреналина: регенерация энергии +3 на 2 хода!</span><br>`;
@@ -947,7 +947,7 @@
                     let resBurn = getRnd(2, 3); def.res = Math.max(0, def.res - resBurn);
                     d20Msg = `<span style='color:#2ecc71'>🎲 СВЕЗЛО! Духи предков помогают в бою: +2 урона и сожжено ${resBurn} энергии врага!</span><br>`;
                 }
-            } else if (roll < 0.10) { // 🔴 5% ЗАПАДЛО (от 0.05 до 0.10)
+            } else if (roll < 0.05) { // 🔴 2.5% ЗАПАДЛО
                 if (att.fClass === "rogue") {
                     isHalfDmg = true;
                     d20Msg = `<span style='color:#e74c3c'>🎲 ЗАПАДЛО! Из трясущихся рук выскользывает кинжал! Урон снижен на 50%!</span><br>`;
