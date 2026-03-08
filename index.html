@@ -122,8 +122,8 @@
     
     /* --- АВАТАРКИ: Новая форма и размер --- */
     .avatar { 
-        width: 115px; height: 115px; /* Увеличили на 10% (было 105px) */
-        border-radius: 18px; 
+        width: 126px; height: 126px; /* Увеличили еще на 10% (было 115px) */
+        border-radius: 18px;
         background: #06362D; 
         border: 3px solid #FFD500; 
         margin-bottom: 8px; object-fit: cover; 
@@ -281,6 +281,8 @@
     }
     #btn-start:hover { background: #D1A505; border-color: #DEE2B1; }
 
+    .log-toggle-btn { display: none; } /* Скрыта на ПК */
+
     /* Мелкие экраны (Телефоны) - Адаптация скролла и UX */
     @media (max-width: 767px) {
         body { padding: 4px; padding-bottom: 80px; /* Даем отступ снизу, чтобы липкая кнопка ничего не перекрывала */ }
@@ -289,16 +291,30 @@
         /* Исправляем горизонтальный скролл на стартовом экране */
         .start-options { grid-template-columns: 1fr; gap: 8px; }
         
-        .avatar { width: 95px; height: 95px; border-radius: 14px; } /* Увеличили на 10% (было 85px) */
+        .avatar { width: 105px; height: 105px; border-radius: 14px; } /* Увеличили на 10% (было 95px) */
         h1 { font-size: 20px; }
         .stats-panel { padding: 10px; }
         
-        /* Решаем проблему "ловушки скролла" - делаем лог чуть компактнее */
+        /* --- Кнопка сворачивания лога (видна только на мобильных) --- */
+        .log-toggle-btn { 
+            display: flex; justify-content: space-between; align-items: center;
+            background: #155332; color: #FFD500; font-weight: bold; font-size: 14px;
+            padding: 8px 15px; border: 1px solid #D1A505; border-bottom: none;
+            border-radius: 10px 10px 0 0; cursor: pointer;
+        }
+
+        /* Настройка мобильного лога (Свернутый и Развернутый) */
         #log-area { 
-            height: 25vh; /* Используем меньше высоты экрана на телефонах */
-            min-height: 150px; 
-            font-size: 12px; 
-            padding: 8px;
+            border-radius: 0 0 10px 10px; /* Убрали верхние скругления из-за кнопки */
+            transition: max-height 0.3s ease, height 0.3s ease;
+        }
+        /* По умолчанию лог свернут (видно ~1 раунд) */
+        #log-area:not(.expanded) {
+            height: 130px; min-height: 130px; max-height: 130px; padding: 8px; font-size: 12px;
+        }
+        /* Когда нажали кнопку развернуть */
+        #log-area.expanded {
+            height: 40vh; min-height: 250px; max-height: 50vh; padding: 8px; font-size: 12px;
         }
         
         .control-box label { padding: 8px 10px; font-size: 12.5px; }
@@ -479,6 +495,10 @@
                         <div class="bar-container"><div class="bar-text" id="b-res-text">10/10</div><div id="b-res-bar" class="res-energy" style="width: 100%;"></div></div>
                         <div id="b-status" class="status-bar"></div>
                     </div>
+                </div>
+                <div class="log-toggle-btn" onclick="toggleLog()">
+                    <span>📜 Журнал боя</span>
+                    <span id="log-caret">🔽</span>
                 </div>
                 <div id="log-area"></div>
             </div>
@@ -1277,6 +1297,21 @@
         }
     }
 
+    function toggleLog() {
+        let log = document.getElementById("log-area");
+        let caret = document.getElementById("log-caret");
+        log.classList.toggle("expanded"); // Переключаем класс
+        
+        // Меняем стрелочку в зависимости от состояния
+        if (log.classList.contains("expanded")) {
+            caret.innerText = "🔼";
+        } else {
+            caret.innerText = "🔽";
+        }
+        // Оставляем скролл в самом низу
+        log.scrollTop = log.scrollHeight;
+    }
+    
     function startGame() {
         try {
             selectedClass = getRadioVal("f_class", "rogue");
