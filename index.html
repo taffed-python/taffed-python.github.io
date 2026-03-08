@@ -196,6 +196,21 @@
     .bar-container { width: 100%; background: #06362D; height: 16px; border-radius: 8px; margin-top: 5px; overflow: hidden; position: relative; border: 1px solid #D1A505;}
     .bar-text { position: absolute; width: 100%; text-align: center; font-size: 11px; line-height: 16px; color: #fff; font-weight: bold; text-shadow: 0 1px 2px #000; z-index: 2;}
     .hp-bar { height: 100%; background: linear-gradient(90deg, #c0392b, #e74c3c); transition: width 0.3s ease-in-out; }
+    /* --- Анимация получения урона (Легкая тряска и красное свечение) --- */
+    /* --- Анимация получения урона (Красная тряска) --- */
+    @keyframes damage-shake {
+        0%, 100% { transform: translateX(0); border-color: #D1A505; }
+        20% { transform: translateX(-3px); border-color: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+        60% { transform: translateX(3px); border-color: #e74c3c; box-shadow: 0 0 8px #e74c3c; }
+    }
+    .damage-anim { animation: damage-shake 0.35s ease-in-out; }
+
+    /* --- Анимация Лечения (Зеленое мягкое свечение вверх) --- */
+    @keyframes heal-glow {
+        0%, 100% { transform: translateY(0); border-color: #D1A505; }
+        50% { transform: translateY(-2px); border-color: #2ecc71; box-shadow: 0 0 12px #2ecc71; }
+    }
+    .heal-anim { animation: heal-glow 0.45s ease-in-out; }
     .res-mana { height: 100%; background: linear-gradient(90deg, #2980b9, #3498db); transition: width 0.3s ease-in-out; }
     .res-energy { height: 100%; background: linear-gradient(90deg, #D1A505, #FFD500); transition: width 0.3s ease-in-out; }
     
@@ -209,11 +224,19 @@
 
     /* Лог боя */
     #log-area { 
-        height: 35vh; min-height: 200px; max-height: 500px; 
+        flex: 1 1 0px; /* Магия Flexbox: занимает остаток высоты левой колонки, но НЕ растягивает её контентом */
+        min-height: 250px; /* Чтобы не сплющило, если правая панель вдруг станет короткой */
         overflow-y: auto; background: #06362D; color: #DEE2B1; padding: 12px; 
         border-radius: 10px; font-size: 13.5px; font-family: "SF Mono", Monaco, Consolas, monospace; 
         border: 1px solid #D1A505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
     }
+    
+    /* --- Красивый кастомный скроллбар --- */
+    #log-area::-webkit-scrollbar { width: 8px; }
+    #log-area::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 8px; }
+    #log-area::-webkit-scrollbar-thumb { background: #155332; border-radius: 8px; border: 1px solid rgba(209, 165, 5, 0.5); }
+    #log-area::-webkit-scrollbar-thumb:hover { background: rgba(209, 165, 5, 0.8); }
+
     .log-msg { margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px solid #155332; line-height: 1.4;}
     
     /* Подсветка текста в логе */
@@ -264,7 +287,17 @@
     
     .control-box label.disabled { opacity: 0.5; cursor: not-allowed; background: #06362D; color: #155332; border-color: #06362D;}
 
-    .action-buttons { margin-top: auto; }
+    /* Блок кнопок (СДЕЛАТЬ ХОД) - теперь плавает и прилипает к низу на ПК */
+    .action-buttons { 
+        margin-top: auto; 
+        position: sticky; 
+        bottom: -5px; /* Прилипает к низу экрана */
+        background: #155332; /* Фон в цвет панели, чтобы перекрывать текст под ней */
+        padding: 15px 5px 10px 5px; 
+        z-index: 100;
+        border-top: 2px dashed rgba(209, 165, 5, 0.4); /* Полупрозрачная золотая линия сверху */
+        box-shadow: 0 -15px 20px -10px rgba(0,0,0,0.5); /* Тень, падающая наверх */
+    }
     .start-sticky-header {
         position: sticky;
         top: -15px; /* Прилипает к самому верху контейнера */
@@ -375,7 +408,7 @@
     <div id="start-screen" class="active">
         
         <div class="start-sticky-header">
-            <button id="btn-start" onclick="startGame()">⚔️ В БОЙ! ⚔️</button>
+            <button id="btn-start" onclick="startGame()">В бой!</button>
         </div>
 
         <div class="start-options">
@@ -506,7 +539,7 @@
             <div class="combat-right">
                 <div class="controls">
                     <div class="control-box">
-                        <h3>⚔️ Атака</h3>
+                        <h3>Атака</h3>
                         <div class="options-grid">
                             <label><input type="radio" name="attack" value="1" checked> Голова</label>
                             <label><input type="radio" name="attack" value="2"> Грудь</label>
@@ -516,7 +549,7 @@
                     </div>
                     
                     <div class="control-box">
-                        <h3>🛡️ Защита</h3>
+                        <h3>Защита</h3>
                         <div class="options-grid">
                             <label><input type="radio" name="block" value="1,2" checked> Блок: Голова и грудь</label>
                             <label><input type="radio" name="block" value="2,3"> Блок: Грудь и живот</label>
@@ -527,15 +560,15 @@
                     </div>
                     
                     <div class="control-box">
-                        <h3>✨ Навыки и Предметы</h3>
+                        <h3>Навыки и Предметы</h3>
                         <div class="options-column" id="skills-container"></div>
                     </div>
                 </div>
 
                 <div class="action-buttons">
-                    <button id="btn-fight" onclick="playRound()">⚔️ СДЕЛАТЬ ХОД ⚔️</button>
-                    <button id="btn-next" onclick="startNewBattle()" style="display:none;">🔄 НОВЫЙ БОЙ</button>
-                    <button id="btn-switch" onclick="goToStartScreen()">🚪 Сменить класс</button>
+                    <button id="btn-fight" onclick="playRound()">Сделать ход</button>
+                    <button id="btn-next" onclick="startNewBattle()" style="display:none;">Новый бой</button>
+                    <button id="btn-switch" onclick="goToStartScreen()">Сменить класс</button>
                 </div>
             </div>
         </div>
@@ -589,8 +622,8 @@
     };
 
     const NAMES = {
-        male: { "rogue": "🗡️ Разбойник", "berserker": "🪓 Берсерк", "mage": "🔮 Маг", "paladin": "🛡️ Паладин", "crossbowman": "🏹 Арбалетчик", "plague_doctor": "🧪 Чумной доктор", "warlock": "💀 Чернокнижник", "shieldbearer": "🧱 Щитоносец", "beekeeper": "🐝 Пчеловод", "samurai": "👺 Самурай" },
-        female: { "rogue": "🗡️ Разбойница", "berserker": "🪓 Воительница", "mage": "🔮 Волшебница", "paladin": "🛡️ Паладинша", "crossbowman": "🏹 Арбалетчица", "plague_doctor": "🧪 Чумной доктор", "warlock": "💀 Чернокнижница", "shieldbearer": "🧱 Дева-Щита", "beekeeper": "🐝 Пчеловодка", "samurai": "👺 Самурай-сан" }
+        male: { "rogue": "Разбойник", "berserker": "Берсерк", "mage": "Маг", "paladin": "Паладин", "crossbowman": "Арбалетчик", "plague_doctor": "Чумной доктор", "warlock": "Чернокнижник", "shieldbearer": "Щитоносец", "beekeeper": "Пчеловод", "samurai": "Самурай" },
+        female: { "rogue": "Разбойница", "berserker": "Берсеркиня", "mage": "Волшебница", "paladin": "Паладинша", "crossbowman": "Арбалетчица", "plague_doctor": "Чумная докторица", "warlock": "Чернокнижница", "shieldbearer": "Дева Щита", "beekeeper": "Пчеловодка", "samurai": "Самурай-сан" }
     };
 
     const AVATARS = {
@@ -621,6 +654,7 @@
             
             this.maxHp = data.hp;
             this.hp = data.hp;
+            this.lastHp = data.hp; // (Память о прошлом ХП)
             
             this.maxRes = fClass === "mage" ? 14 : 12;
             
@@ -738,6 +772,14 @@
         document.getElementById("p-name").innerHTML = `Игрок (<span title="${pInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][player.fClass]}</span>)`;
 
         document.getElementById("p-hp-text").innerText = `${player.hp}/${player.maxHp} HP`;
+        let pBarCont = document.getElementById("p-hp-bar").parentElement;
+        if (player.hp < player.lastHp) {
+            pBarCont.classList.remove("damage-anim", "heal-anim"); void pBarCont.offsetWidth; pBarCont.classList.add("damage-anim");
+        } else if (player.hp > player.lastHp) {
+            pBarCont.classList.remove("damage-anim", "heal-anim"); void pBarCont.offsetWidth; pBarCont.classList.add("heal-anim");
+        }
+        player.lastHp = player.hp;
+        
         document.getElementById("p-hp-bar").style.width = `${(player.hp/player.maxHp)*100}%`;
         document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
         document.getElementById("p-res-bar").className = player.resType==="energy" ? "res-energy" : "res-mana";
@@ -750,13 +792,19 @@
         let bs1 = C_DATA[bot.fClass].skills[0];
         let bs2 = C_DATA[bot.fClass].skills[1];
         let bRes = bot.resType === "energy" ? "Эн." : "Ман.";
-        
-        // Склеиваем пассивку и скиллы (символ &#10; делает красивый перенос строки)
         let bFullInfo = `${bInfo}&#10;&#10;✨ НАВЫКИ ВРАГА:&#10;🔸 ${bs1.name} (${bs1.cost} ${bRes}): ${bs1.desc}&#10;🔸 ${bs2.name} (${bs2.cost} ${bRes}): ${bs2.desc}`;
         
         document.getElementById("b-name").innerHTML = `Вражина (<span title="${bFullInfo}" onclick="showInfo(this.title)" style="cursor:help; border-bottom: 1px dashed rgba(255,255,255,0.4); padding-bottom: 1px;">${NAMES[matchGender][bot.fClass]}</span>)`;
 
         document.getElementById("b-hp-text").innerText = `${bot.hp}/${bot.maxHp} HP`;
+        let bBarCont = document.getElementById("b-hp-bar").parentElement;
+        if (bot.hp < bot.lastHp) {
+            bBarCont.classList.remove("damage-anim", "heal-anim"); void bBarCont.offsetWidth; bBarCont.classList.add("damage-anim");
+        } else if (bot.hp > bot.lastHp) {
+            bBarCont.classList.remove("damage-anim", "heal-anim"); void bBarCont.offsetWidth; bBarCont.classList.add("heal-anim");
+        }
+        bot.lastHp = bot.hp;
+        
         document.getElementById("b-hp-bar").style.width = `${(bot.hp/bot.maxHp)*100}%`;
         document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
         document.getElementById("b-res-bar").className = bot.resType==="energy" ? "res-energy" : "res-mana";
@@ -778,10 +826,10 @@
             html += `<label style="flex-direction: column; align-items: flex-start;">
                 <div style="display: flex; align-items: center;">
                     <input type="radio" name="spell" value="potion"> 
-                    <span style="font-weight: bold;">🧪 Зелье здоровья (+15 HP) [1 шт]</span>
+                    <span style="font-weight: bold;">🧪 Зелье восстановления [1 шт]</span>
                 </div>
                 <div style="font-size: 12px; color: #DEE2B1; opacity: 0.85; margin-top: 4px; font-weight: normal; line-height: 1.3;">
-                    Мгновенно восстанавливает 15 здоровья. Не тратит ход.
+                    Восстанавливает 10-15 здоровья и 2-3 ресурса. Не тратит ход.
                 </div>
             </label>`;
         }
@@ -1007,16 +1055,6 @@
         let zoneText = `<u>${ZONES[aZone].toLowerCase()}</u>`;
         let verb = att.fClass==="rogue"?"вонзает кинжал в":att.fClass==="berserker"?"рубит в":att.fClass==="paladin"?"бьет молотом в":att.fClass==="crossbowman"?"стреляет в":att.fClass==="plague_doctor"?"режет скальпелем в":att.fClass==="shieldbearer"?"бьет щитом в":att.fClass==="samurai"?"рубит катаной в":"бьет посохом в";
         if (isSwarm) verb = "напускает рой на";
-        if(att.effects.sticky.t > 0 && Math.random() < att.effects.sticky.a) {
-            return [`🍯 Липкие руки мешают! ${att.logName} промахивается!`, "dodge"];
-        }
-        if(att.effects.blind.t > 0) {
-            att.effects.blind.t = 0; 
-            return [`🌫️ Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"];
-        }
-        if(att.effects.ice.t > 0 && Math.random() < 0.5) {
-            return [`🧊 ${att.logName} поскальзывается на льду! Промах!`, "dodge"];
-        }
 
         if(att.effects.sticky.t > 0 && Math.random() < att.effects.sticky.a) return [d20Msg + `🍯 Липкие руки мешают! ${att.logName} промахивается!`, "dodge"];
         if(att.effects.blind.t > 0) { att.effects.blind.t = 0; return [d20Msg + `🌫️ Ослепленный ${att.logName} бьет наугад и промахивается!`, "dodge"]; }
@@ -1152,8 +1190,14 @@
         let cName = caster.logName;
 
         if (skillId === "potion") {
-            caster.hasPotion = false; caster.heal(15);
-            logMsg(`🧪 ${cName} выпивает Зелье Здоровья! Восстановлено 15 HP.`, "heal"); return;
+            caster.hasPotion = false; 
+            let healAmt = getRnd(10, 15);
+            let resAmt = getRnd(2, 3);
+            caster.heal(healAmt);
+            caster.addRes(resAmt);
+            let rName = caster.resType === "energy" ? "Энергии" : "Маны";
+            logMsg(`🧪 ${cName} выпивает Зелье! Восстановлено ${healAmt} HP и ${resAmt} ${rName}.`, "heal"); 
+            return;
         }
 
         caster.res -= C_DATA[caster.fClass].skills.find(s=>s.id===skillId).cost;
@@ -1311,7 +1355,7 @@
         // Оставляем скролл в самом низу
         log.scrollTop = log.scrollHeight;
     }
-    
+
     function startGame() {
         try {
             selectedClass = getRadioVal("f_class", "rogue");
@@ -1328,7 +1372,7 @@
         let classes = ["rogue", "berserker", "mage", "paladin", "crossbowman", "plague_doctor", "warlock", "shieldbearer", "beekeeper", "samurai"];
         bot = new Fighter("Вражина", pickRandom(classes), matchGender, true);
         roundNum = 1;
-        document.getElementById("btn-fight").disabled = false; document.getElementById("btn-next").style.display = "none";
+        document.getElementById("btn-fight").style.display = "block"; document.getElementById("btn-next").style.display = "none";
         document.getElementById("log-area").innerHTML = ""; 
         logMsg(`⚔️ Бой начался! Ваш противник: ${NAMES[matchGender][bot.fClass]}.`, "system");
         updateStats();
@@ -1360,8 +1404,8 @@
         if(pSpell !== "none") processSkill(player, bot, pSpell, pAtt, bBlocks);
         if(bot.isAlive() && bSpell !== "none") processSkill(bot, player, bSpell, bAtt, pBlocks);
 
-        let pStrikes = [{zone: pAtt, ignoreBlock: false, half: false}]; 
-        let bStrikes = [{zone: bAtt, ignoreBlock: false, half: false}];
+        let pStrikes = [{zone: pAtt, ignoreBlock: false, half: false, fixed: null, isSwarm: false}]; 
+        let bStrikes = [{zone: bAtt, ignoreBlock: false, half: false, fixed: null, isSwarm: false}];
         
         // Разбойник (30%)
         if (player.fClass === "rogue" && Math.random() < 0.30) { 
@@ -1452,7 +1496,7 @@
 
     function checkGameOver() {
         if(!player.isAlive() || !bot.isAlive()) {
-            document.getElementById("btn-fight").disabled = true; 
+            document.getElementById("btn-fight").style.display = "none"; // Прячем кнопку полностью
             updateStats();
             logMsg("<br>=== БОЙ ОКОНЧЕН ===", "system");
             
