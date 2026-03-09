@@ -294,27 +294,66 @@
         transition: width 0.8s ease-in-out; 
     }
 
-    /* Статусы - яркие плашки */
-    .status-bar { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; min-height: 22px; margin-top: 8px; width: 100%;}
-    /* --- Анимация плавного появления статусов --- */
-    @keyframes badge-pop {
-        0% { opacity: 0; transform: scale(0.5) translateY(5px); }
-        100% { opacity: 1; transform: scale(1) translateY(0); }
-    }
+/* Статусы - чип стиль */
+.status-bar { display: flex; flex-wrap: wrap; gap: 5px; justify-content: center; min-height: 22px; margin-top: 8px; width: 100%; }
 
-    .status-badge { 
-        display: inline-flex; align-items: center; padding: 2px 6px; 
-        border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; 
-        border: 1px solid rgba(0,0,0,0.3); box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        
-        /* Делаем их изначально невидимыми и вешаем анимацию */
-        opacity: 0;
-        animation: badge-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-    .sb-burn { background: #d35400; } .sb-poison { background: #27ae60; } .sb-bleed { background: #900c3f; }
-    .sb-curse { background: #5b2c6f; } .sb-ice { background: #2980b9; } .sb-blind { background: #34495e; }
-    .sb-thorns { background: #D1A505; color: #06362D; } .sb-regen { background: #1e8449; }
-    .sb-buff { background: #FFD500; color: #06362D; } .sb-debuff { background: #c0392b; } .sb-shield { background: #7f8c8d; } .sb-vuln { background: #e74c3c; }
+@keyframes badge-pop {
+    0%   { opacity: 0; transform: scale(0.5) translateY(5px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.status-badge {
+    display: inline-flex; align-items: center;
+    border-radius: 7px; overflow: hidden;
+    font-size: 12px; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.45);
+    opacity: 0;
+    animation: badge-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+/* Левая часть — иконка на цветном фоне */
+.status-badge .sb-icon {
+    padding: 4px 6px;
+    font-size: 14px;
+    line-height: 1;
+    color: #fff;
+}
+/* Правая часть — текст на тёмном фоне */
+.status-badge .sb-text {
+    padding: 4px 7px;
+    background: #06362D;
+    color: #DEE2B1;
+    font-size: 11px;
+    line-height: 1;
+    border-left: 1px solid rgba(0,0,0,0.3);
+}
+
+/* Цвета иконки для каждого статуса */
+.sb-burn  .sb-icon { background: #d35400; border: 2px solid #d35400; }
+.sb-poison .sb-icon { background: #27ae60; border: 2px solid #27ae60; }
+.sb-bleed .sb-icon { background: #900c3f; border: 2px solid #900c3f; }
+.sb-curse .sb-icon { background: #5b2c6f; border: 2px solid #5b2c6f; }
+.sb-ice   .sb-icon { background: #2980b9; border: 2px solid #2980b9; }
+.sb-blind .sb-icon { background: #34495e; border: 2px solid #34495e; }
+.sb-thorns .sb-icon { background: #D1A505; border: 2px solid #D1A505; }
+.sb-regen .sb-icon { background: #1e8449; border: 2px solid #1e8449; }
+.sb-buff  .sb-icon { background: #FFD500; border: 2px solid #FFD500; }
+.sb-debuff .sb-icon { background: #c0392b; border: 2px solid #c0392b; }
+.sb-shield .sb-icon { background: #7f8c8d; border: 2px solid #7f8c8d; }
+.sb-vuln  .sb-icon { background: #e74c3c; border: 2px solid #e74c3c; }
+
+/* Рамка вокруг всего чипа = цвет иконки */
+.sb-burn   { border: 2px solid #d35400; }
+.sb-poison { border: 2px solid #27ae60; }
+.sb-bleed  { border: 2px solid #900c3f; }
+.sb-curse  { border: 2px solid #5b2c6f; }
+.sb-ice    { border: 2px solid #2980b9; }
+.sb-blind  { border: 2px solid #34495e; }
+.sb-thorns { border: 2px solid #D1A505; }
+.sb-regen  { border: 2px solid #1e8449; }
+.sb-buff   { border: 2px solid #FFD500; }
+.sb-debuff { border: 2px solid #c0392b; }
+.sb-shield { border: 2px solid #7f8c8d; }
+.sb-vuln   { border: 2px solid #e74c3c; }
 
     /* Лог боя */
     #log-area { 
@@ -1049,32 +1088,38 @@
         
         let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
         
-        // --- Логика каскадной задержки ---
-        let delay = 0;
-        let step = 0.08; // Каждый следующий статус появляется на 80мс позже
-        function getStyle() { 
-            let s = `animation-delay: ${delay}s;`; 
-            delay += step; 
-            return s; 
-        }
+        function chip(cls, icon, text, style, title) {
+    return `<span class="status-badge ${cls}" style="${style}" title="${title}" onclick="showInfo(this.title)" style="cursor:help;">
+        <span class="sb-icon">${icon}</span>
+        <span class="sb-text">${text}</span>
+    </span>`;
+    }
+
+    let delay = 0;
+    const st = () => { let s = `animation-delay:${delay}s`; delay += 0.08; return s; };
         
-        if(e.burn.t > 0) html += `<span class="status-badge sb-burn" style="${getStyle()}" title="Горение: ${e.burn.a} урона. Ходов: ${e.burn.t}" ${oc}>🔥 ${e.burn.t}</span>`;
-        if(e.poison.t > 0) html += `<span class="status-badge sb-poison" style="${getStyle()}" title="Яд: ${e.poison.a} урона. Ходов: ${e.poison.t}" ${oc}>⚗️ ${e.poison.t}</span>`;        
-        if(e.bleed.t > 0) html += `<span class="status-badge sb-bleed" style="${getStyle()}" title="Кровотечение: ${e.bleed.a} урона. Ходов: ${e.bleed.t}" ${oc}>🩸 ${e.bleed.t}</span>`;
-        if(e.curse.t > 0) html += `<span class="status-badge sb-curse" style="${getStyle()}" title="Проклятие: ${e.curse.a} урона. Ходов: ${e.curse.t}" ${oc}>💀 ${e.curse.t}</span>`;
-        if(e.ice.t > 0) html += `<span class="status-badge sb-ice" style="${getStyle()}" title="Гололедица: 50% шанс промаха физ. атакой. Ходов: ${e.ice.t}" ${oc}>🧊 ${e.ice.t}</span>`;
-        if(e.dmgDebuff.t > 0) html += `<span class="status-badge sb-debuff" style="${getStyle()}" title="Наносимый урон снижен. Ходов: ${e.dmgDebuff.t}" ${oc}>⛓️ ${e.dmgDebuff.t}</span>`;        
-        if(e.regen.t > 0) html += `<span class="status-badge sb-regen" style="${getStyle()}" title="Регенерация: +${e.regen.a} ХП. Ходов: ${e.regen.t}" ${oc}>💚 ${e.regen.t}</span>`;
-        if(e.thorns.t > 0) html += `<span class="status-badge sb-thorns" style="${getStyle()}" title="Святая Клятва: Шипы и хил при блоке. Ходов: ${e.thorns.t}" ${oc}>♱ ${e.thorns.t}</span>`;
-        if(e.sharpen.c > 0) html += `<span class="status-badge sb-buff" style="${getStyle()}" title="Заточка: +6 урона. Зарядов: ${e.sharpen.c}" ${oc}>🗡️ ${e.sharpen.c}</span>`;
-        if(f.samuraiBonus > 0) html += `<span class="status-badge sb-buff" style="${getStyle()}" title="Стойка: +${f.samuraiBonus} урона до первого попадания." ${oc}>👺 +${f.samuraiBonus}</span>`;
-        if(e.vuln.t > 0) html += `<span class="status-badge sb-vuln" style="${getStyle()}" title="Уязвимость: получает на ${e.vuln.a * 100}% больше любого урона. Ходов: ${e.vuln.t}" ${oc}>🎯 ${e.vuln.t}</span>`;
-        if(e.exhaustion.t > 0) html += `<span class="status-badge sb-debuff" style="${getStyle()}" title="Истощение: регенерация ресурсов снижена на ${e.exhaustion.a * 100}%. Ходов: ${e.exhaustion.t}" ${oc}>🪫 ${e.exhaustion.t}</span>`;        
-        if(e.sunder.t > 0) html += `<span class="status-badge sb-debuff" style="${getStyle()}" title="Раскол: ${e.sunder.a * 100}% шанс провала блока. Ходов: ${e.sunder.t}" ${oc}>💔 ${e.sunder.t}</span>`;
-        if(f.swarm > 0) html += `<span class="status-badge sb-buff" style="${getStyle()}" title="Рой: Наносит ${f.swarm} урона каждый ход сквозь броню." ${oc}>🐝 ${f.swarm}</span>`;
-        if(e.sticky.t > 0) html += `<span class="status-badge sb-debuff" style="${getStyle()}" title="Липкие руки: ${Math.round(e.sticky.a * 100)}% шанс промаха. Ходов: ${e.sticky.t}" ${oc}>🍯 ${e.sticky.t}</span>`;
-        if(e.miasma.t > 0) html += `<span class="status-badge sb-buff" style="${getStyle()}" title="Миазмы: 50% шанс пробить блок. Ходов: ${e.miasma.t}" ${oc}>🧪 ${e.miasma.t}</span>`;
-        
+       // DoT: показываем "урон × ходы"
+    if(e.burn.t > 0)    html += chip("sb-burn",   "🔥", `${e.burn.a} ур ⏳${e.burn.t}`,     st(), `Горение: ${e.burn.a} ур/ход. Ходов: ${e.burn.t}`);
+    if(e.poison.t > 0)  html += chip("sb-poison", "⚗️", `${e.poison.a} ур ⏳${e.poison.t}`, st(), `Яд: ${e.poison.a} ур/ход. Ходов: ${e.poison.t}`);
+    if(e.bleed.t > 0)   html += chip("sb-bleed",  "🩸", `${e.bleed.a} ур ⏳${e.bleed.t}`,   st(), `Кровотечение: ${e.bleed.a} ур/ход. Ходов: ${e.bleed.t}`);
+    if(e.curse.t > 0)   html += chip("sb-curse",  "💀", `${e.curse.a} ур ⏳${e.curse.t}`,   st(), `Проклятие: ${e.curse.a} ур/ход. Ходов: ${e.curse.t}`);
+    if(e.regen.t > 0)   html += chip("sb-regen",  "💚", `+${e.regen.a} HP ⏳${e.regen.t}`,  st(), `Регенерация: +${e.regen.a} HP/ход. Ходов: ${e.regen.t}`);
+
+    // Дебаффы без урона: просто "⏳ ходы"
+    if(e.ice.t > 0)     html += chip("sb-ice",    "❄️", `⏳${e.ice.t}`,                        st(), `Гололедица: 50% промах. Ходов: ${e.ice.t}`);
+    if(e.dmgDebuff.t>0) html += chip("sb-debuff", "⛓️", `⏳${e.dmgDebuff.t}`,                  st(), `Урон снижен на ${e.dmgDebuff.a}. Ходов: ${e.dmgDebuff.t}`);
+    if(e.thorns.t > 0)  html += chip("sb-thorns", "♱",  `⏳${e.thorns.t}`,                     st(), `Святая Клятва. Ходов: ${e.thorns.t}`);
+    if(e.vuln.t > 0)    html += chip("sb-vuln",   "🎯", `⏳${e.vuln.t}`,                       st(), `Уязвимость: +${e.vuln.a*100}% урона. Ходов: ${e.vuln.t}`);
+    if(e.exhaustion.t>0)html += chip("sb-debuff", "🪫", `⏳${e.exhaustion.t}`,                  st(), `Истощение. Ходов: ${e.exhaustion.t}`);
+    if(e.sunder.t > 0)  html += chip("sb-debuff", "💔", `⏳${e.sunder.t}`,                     st(), `Раскол: 50% провал блока. Ходов: ${e.sunder.t}`);
+    if(e.sticky.t > 0)  html += chip("sb-debuff", "🍯", `⏳${e.sticky.t}`,                     st(), `Липкие руки: ${Math.round(e.sticky.a*100)}% промах. Ходов: ${e.sticky.t}`);
+    if(e.miasma.t > 0)  html += chip("sb-buff",   "🧪", `⏳${e.miasma.t}`,                     st(), `Миазмы: 50% пробить блок. Ходов: ${e.miasma.t}`);
+
+    // Стаки/заряды: без ⏳
+    if(e.sharpen.c > 0) html += chip("sb-buff",   "🗡️", `×${e.sharpen.c}`,                    st(), `Заточка: +6 урона. Зарядов: ${e.sharpen.c}`);
+    if(f.samuraiBonus>0)html += chip("sb-buff",   "👺", `+${f.samuraiBonus}`,                  st(), `Стойка: +${f.samuraiBonus} урона до попадания`);
+    if(f.swarm > 0)     html += chip("sb-buff",   "🐝", `×${f.swarm}`,                         st(), `Рой: ${f.swarm} урона каждый ход`);
+
         document.getElementById(containerId).innerHTML = html;
     }
 
