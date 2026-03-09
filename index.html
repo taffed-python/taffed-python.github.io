@@ -411,12 +411,16 @@
     .control-box input[type="radio"] { display: none; }
     
     /* Мягкое золотое выделение выбранного действия */
+    
     .control-box label:has(input:checked) { 
-        background: rgba(209, 165, 5, 0.25); 
+        background: 
+            radial-gradient(circle at 0% 50%, rgba(255, 213, 0, 0.25) 0%, transparent 70%),
+            rgba(209, 165, 5, 0.1);
         border-color: #D1A505; 
+        border-left: 4px solid #FFD500; /* Яркий маркер слева */
         color: #FFD500; 
         font-weight: 700; 
-        box-shadow: inset 0 0 8px rgba(209, 165, 5, 0.2); 
+        transform: translateX(3px); /* Слегка сдвигает текст/кнопку вправо при выборе */
     }
     
     .control-box label.disabled { opacity: 0.5; cursor: not-allowed; background: #06362D; color: #155332; border-color: #06362D;}
@@ -2091,18 +2095,33 @@
         particles.push(new Particle());
     }
 
-    function animateParticles() {
-        // Полностью очищаем кадр перед отрисовкой нового (фон прозрачный)
-        ctx.clearRect(0, 0, width, height);
+    // --- Анимированный фон (Оптимизированный под 60 FPS) ---
+    // ... (код с классом Particle и заполнением массива остается прежним) ...
+
+    let lastTime = 0;
+    const fpsLimit = 60; // Можно поставить 40 для еще большей экономии заряда
+
+    function animateParticles(timestamp) {
+        // Вычисляем разницу во времени между кадрами
+        const delta = timestamp - lastTime;
+
+        // Если прошло достаточно времени (для 60 FPS это ~16.6мс)
+        if (delta >= 1000 / fpsLimit) {
+            lastTime = timestamp;
+
+            ctx.clearRect(0, 0, width, height);
+            
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+        }
         
-        particles.forEach(p => {
-            p.update();
-            p.draw();
-        });
-        
+        // Запрашиваем следующий кадр, передавая timestamp
         requestAnimationFrame(animateParticles);
     }
     
-    animateParticles();
+    // Запускаем анимацию, передав начальный 0
+    requestAnimationFrame(animateParticles);
 </script> </body>
 </html>
