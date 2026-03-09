@@ -722,7 +722,7 @@
                 <div class="class-header">🛡️ Паладин (60 HP)</div>
                 <div class="class-desc">Удачный блок лечит 1-2 HP. 25% шанс ударить магией света (+3 урона) при атаке.</div>
                 <div class="skills-reveal"><div class="skills-inner">
-                    <b>Карающий удар (5 Маны):</b> 3-4 физ. и 2-3 маг. урона. Физику можно заблокировать, магию — нет.<br>
+                    <b>Карающий удар (5 Маны):</b> 3-4 физ. и 2-3 маг. урона. Физика блокируется. Снижает атаку врага на 2 на 1 ход.<br>
                     <b>Святая Клятва (4 Маны):</b> На 2 хода ваши успешные блоки наносят 3 маг. урона атакующему.
                 </div></div>
             </label>
@@ -879,7 +879,7 @@
             {id: "mana_shield", name: "🛡️ Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 50% получаемого урона и любые статусные эффекты обратно во врага."}
         ]},
         paladin: { hp: 60, res: "mana", minD: 4, maxD: 6, skills: [
-            {id: "punish", name: "⛓️ Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Если враг ставит блок, он поглотит только физическую часть."},
+            {id: "punish", name: "⛓️ Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Физика блокируется. Снижает урон врага на 2 на 1 ход."},
             {id: "oath", name: "♱ Святая клятва", cost: 4, type: "skill", desc: "На 2 хода каждый ваш успешный блок дополнительно бьет врага на 3 магического урона (шипы)."}
         ]},
         crossbowman: { hp: 60, res: "energy", minD: 4, maxD: 7, skills: [
@@ -999,7 +999,7 @@
            this.effects = {
                 burn: {t:0, a:0}, poison: {t:0, a:0}, bleed: {t:0, a:0}, curse: {t:0, a:0}, 
                 ice: {t:0}, blind: {t:0}, thorns: {t:0}, regen: {t:0, a:0}, 
-                atkDebuff: {t:0, a:0}, dmgDebuff: {t:0, a:0}, sharpen: {c:0}, shield: {t:0}, vuln: {t:0, a:0},
+                dmgDebuff: {t:0, a:0}, sharpen: {c:0}, shield: {t:0}, vuln: {t:0, a:0},
                 exhaustion: {t:0, a:0}, sunder: {t:0, a:0}, sticky: {t:0, a:0}, unblockable: {t:0},
                 pacified: {t:0}, miasma: {t:0},
                 healDebuff: {t:0, a:0}, bonusRegen: {t:0, a:0}, weakBlock: {t:0, a:0}
@@ -1054,13 +1054,13 @@
         hasAnyDebuff() {
             return this.effects.burn.t > 0 || this.effects.poison.t > 0 || this.effects.bleed.t > 0 || 
                    this.effects.curse.t > 0 || this.effects.ice.t > 0 || this.effects.dmgDebuff.t > 0 || 
-                   this.effects.atkDebuff.t > 0 || this.effects.blind.t > 0 || this.effects.vuln.t > 0 ||
+                   this.effects.blind.t > 0 || this.effects.vuln.t > 0 ||
                    this.effects.exhaustion.t > 0 || this.effects.sunder.t > 0 ||
                    this.effects.sticky.t > 0;
         }
     }
 
-    let player, bot, roundNum, matchGender;
+    let player, bot, roundNum, matchGender, selectedClass;
     let playerAttackHistory = [];
     let playerBlockHistory = [];
     
@@ -1085,12 +1085,9 @@
    function renderStatuses(f, containerId) {
         let html = "";
         let e = f.effects;
-        
-        let oc = 'onclick="showInfo(this.title)" style="cursor:help;"';
-        
+                
         function chip(cls, icon, text, style, title) {
-    return `<span class="status-badge ${cls}" style="${style}" title="${title}" onclick="showInfo(this.title)" style="cursor:help;">
-        <span class="sb-icon">${icon}</span>
+        return `<span class="status-badge ${cls}" style="${style}; cursor:help;" title="${title}" onclick="showInfo(this.title)">        <span class="sb-icon">${icon}</span>
         <span class="sb-text">${text}</span>
     </span>`;
     }
@@ -1138,8 +1135,14 @@
         }
         player.lastHp = player.hp;
         
+        // Обновляем основную полоску мгновенно
         document.getElementById("p-hp-bar").style.width = `${(player.hp/player.maxHp)*100}%`;
-        document.getElementById("p-hp-ghost").style.width = `${(player.hp/player.maxHp)*100}%`;
+        // Фантомная полоска ждет 400мс, прежде чем поехать следом
+        setTimeout(() => {
+            if(document.getElementById("p-hp-ghost")) {
+                document.getElementById("p-hp-ghost").style.width = `${(player.hp/player.maxHp)*100}%`;
+            }
+        }, 400);
 
         // --- РЕСУРСЫ ИГРОКА ---
         document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
@@ -1168,7 +1171,11 @@
         bot.lastHp = bot.hp;
         
         document.getElementById("b-hp-bar").style.width = `${(bot.hp/bot.maxHp)*100}%`;
-        document.getElementById("b-hp-ghost").style.width = `${(bot.hp/bot.maxHp)*100}%`;
+        setTimeout(() => {
+            if(document.getElementById("b-hp-ghost")) {
+                document.getElementById("b-hp-ghost").style.width = `${(bot.hp/bot.maxHp)*100}%`;
+            }
+        }, 400);
 
         // --- РЕСУРСЫ ВРАГА ---
         document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
@@ -1246,7 +1253,7 @@
             }
 
             if (f.latestDebuff) {
-                if (["dmgDebuff", "atkDebuff", "miasma"].includes(f.latestDebuff)) {
+                if (["dmgDebuff", "miasma"].includes(f.latestDebuff)) {
                     avatar.classList.add("avatar-debuff");
                 } else {
                     avatar.classList.add("avatar-" + f.latestDebuff);
@@ -1317,6 +1324,13 @@
     }
 
     function dealSkillDamage(caster, target, baseDmg, isMagic, isDot = false) {
+        
+        // --- УНИВЕРСАЛЬНЫЙ СРЕЗ УРОНА ОТ НАВЫКОВ ---
+        // Если это не периодический урон (ДоТ) и на атакующем висит дебафф
+        if (!isDot && caster.effects.dmgDebuff && caster.effects.dmgDebuff.t > 0) {
+            baseDmg = Math.max(1, baseDmg - caster.effects.dmgDebuff.a);
+        }
+
         let mit = applyMitigation(target, baseDmg, isDot, isMagic, caster);
         let finalDmg = applyVuln(target, mit.finalDmg);
         let reflectMsg = "";
@@ -1492,7 +1506,6 @@
         }
 
         if(att.effects.dmgDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.dmgDebuff.a);
-        if(att.effects.atkDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.atkDebuff.a);
 
         let isCrit = att.fClass === "berserker" && Math.random() < att.critChance;
         if (att.megaCrit) { dmg = Math.floor(dmg * 1.5); att.megaCrit = false; } // Мега-крит Берсерка
@@ -1623,13 +1636,20 @@
 
         if(skillId === "torn_wound") {
             let dmg = getRnd(caster.minDmg, caster.maxDmg);
-            if(caster.effects.dmgDebuff.t > 0) dmg = Math.max(1, dmg - caster.effects.dmgDebuff.a);
             let r = dealSkillDamage(caster, target, dmg, false);
             let sMsg = applyStatus(caster, target, "bleed", 3, 2, true);
             logMsg(`🪓 ${cName} наносит Рваную Рану (${r.dmg} ур)! Враг истекает кровью.${sMsg}${r.msg}`, "crit");
         }
+        
         else if (skillId === "execution") {
             caster.takeDamage(3); 
+            
+            // <-- ДОБАВЛЯЕМ ПРОВЕРКУ НА СМЕРТЬ -->
+            if (!caster.isAlive()) {
+                logMsg(`🪓 ${cName} попытался провести Казнь, но умер от собственных ран до удара!`, "crit");
+                return;
+            }
+
             let missingHp = caster.maxHp - caster.hp; 
             let bonusDmg = Math.floor(missingHp / 5); 
             let totalDmg = 3 + bonusDmg; 
@@ -1648,10 +1668,22 @@
         }
         
         else if(skillId === "punish") {
-            let r1 = dealSkillDamage(caster, target, getRnd(6, 8), false);
-            let r2 = dealSkillDamage(caster, target, 3, true);
-            let sMsg = applyStatus(caster, target, "atkDebuff", 1, 3);
-            logMsg(`🔨 ${cName} обрушивает Карающий удар (${r1.dmg + r2.dmg} суммарно)! Атака врага снижена.${sMsg}${r1.msg}${r2.msg}`, "spell");
+            let isBlocked = bZones.includes(aZone.toString());
+            let r1 = { dmg: 0, msg: "" };
+            let blockMsg = "";
+            
+            // Если зона открыта - наносим физический урон молотом
+            if (!isBlocked) {
+                r1 = dealSkillDamage(caster, target, getRnd(3, 4), false);
+            } else {
+                blockMsg = " 🛡️ Физ. урон заблокирован!";
+            }
+            
+            // Магический урон Светом наносится В ЛЮБОМ СЛУЧАЕ
+            let r2 = dealSkillDamage(caster, target, getRnd(2, 3), true);
+            let sMsg = applyStatus(caster, target, "dmgDebuff", 1, 2);
+            
+            logMsg(`🔨 ${cName} обрушивает Карающий удар (${r1.dmg + r2.dmg} суммарно)!${blockMsg} Атака врага снижена на 2.${sMsg}${r1.msg}${r2.msg}`, "spell");
         }
         else if(skillId === "lucky_strike") {
             let isBlocked = bZones.includes(aZone.toString());
@@ -1698,12 +1730,17 @@
         else if(skillId === "incendiary") {
             let isBlocked = bZones.includes(aZone.toString());
             let rMsg = "";
+            let sMsg = ""; // Выносим переменную сюда
+            
             if (!isBlocked) {
                 let r = dealSkillDamage(caster, target, getRnd(3, 5), false);
                 rMsg = `(${r.dmg} ур) `;
+                // Накладываем горение ТОЛЬКО если болт пробил защиту
+                sMsg = applyStatus(caster, target, "burn", 2, 1, true);
             }
-            let sMsg = applyStatus(caster, target, "burn", 2, 1, true);
-            logMsg(`🧨 ${cName} выпускает Зажигательный болт ${rMsg}! Взрыв поджигает врага.${sMsg}`, "spell");
+            
+            let finalLog = !isBlocked ? `Взрыв поджигает врага.${sMsg}` : `Взрыв заблокирован щитом.`;
+            logMsg(`🧨 ${cName} выпускает Зажигательный болт ${rMsg}! ${finalLog}`, "spell");
         }
         else if(skillId === "hex") {
             let r = dealSkillDamage(caster, target, getRnd(3, 4), true);
@@ -1910,6 +1947,7 @@
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
         player.d20Rolled = bot.d20Rolled = false;
         player.skipBlock = bot.skipBlock = false;
+        player.crossbowJam = bot.crossbowJam = false;
         
         // Сбрасываем счетчики перед началом нового раунда
         player.turnMaxDmg = 0; player.turnMaxHeal = 0;
@@ -1992,7 +2030,6 @@
             if(f.effects.ice.t>0) f.effects.ice.t--;
             if(f.effects.blind.t>0) f.effects.blind.t--;
             if(f.effects.dmgDebuff.t>0) f.effects.dmgDebuff.t--;
-            if(f.effects.atkDebuff.t>0) f.effects.atkDebuff.t--;
             if(f.effects.thorns.t>0) f.effects.thorns.t--;
             if(f.effects.shield.t>0) f.effects.shield.t--;
             if(f.effects.vuln.t>0) f.effects.vuln.t--;
