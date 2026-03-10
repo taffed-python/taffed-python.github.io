@@ -110,16 +110,22 @@
     
     /* 3. Магия анимации навыков (скрыты по умолчанию) */
     .skills-reveal {
-        max-height: 0;
+        display: grid;
+        grid-template-rows: 0fr;
         opacity: 0;
+        margin-top: 0;
+        transition: grid-template-rows 0.35s ease-out, opacity 0.35s ease-out, margin-top 0.35s ease-out;
+    }
+    
+    /* Важно для работы grid-анимации (внутренний блок обрезает контент) */
+    .skills-reveal > div {
         overflow: hidden;
-        transition: max-height 0.4s ease, opacity 0.4s ease, margin-top 0.4s ease;
     }
     
     /* Раскрываем навыки при наведении ИЛИ если класс выбран (супер для iPad) */
     .class-card:hover .skills-reveal,
     .class-card:has(input:checked) .skills-reveal {
-        max-height: 300px; /* Запас по высоте для текста */
+        grid-template-rows: 1fr; /* CSS сам вычислит идеальную высоту текста! */
         opacity: 1;
         margin-top: 10px;
     }
@@ -816,7 +822,7 @@
             <label class="class-card">
                 <input type="radio" name="f_class" value="beekeeper">
                 <div class="class-header">🐝 Пчеловод (60 HP)</div>
-                <div class="class-desc">Атаки копят Рой (до 3), который атакует случайную зону каждый ход. При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.</div>
+                <div class="class-desc">Удачные атаки копят Рой (до 3), который бьет в случайную зону каждый ход. При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Залепи дуло (4 Энергии):</b> 2-3 урона + Липкие руки (15% шанс промаха врага на 2 хода).<br>
                     <b>Медок (5 Энергии):</b> Восстанавливает 6 HP. Размер Роя сбрасывается до 1.
@@ -978,7 +984,7 @@
         "plague_doctor": "Пассивка: Удар лечит 1 ХП (по отравленному 2-3 ХП) и вешает Яд. 25% шанс отравить атакующего при получении урона.",
         "warlock": "Пассивка: Успешная атака дает +1 к Проклятию. В конце хода лечит 1 HP, если враг проклят.",
         "shieldbearer": "Пассивка: Любой получаемый урон снижен на 1. 25% шанс дополнительно заблокировать 3-4 урона.",
-        "beekeeper": "Пассивка: Атаки копят Рой (до 3). При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.",
+        "beekeeper": "Пассивка: Удачные атаки копят Рой (до 3). При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.",
         "samurai": "Пассивка: 25% парировать атаку (-4 урона). Накапливает +2 урона за каждый ваш промах или удар в блок."
     };
 
@@ -1491,7 +1497,8 @@
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Госпитализация! Доктор 100% провалит свой блок в этом ходу!</span><br>`;
                 } else if (att.fClass === "warlock") {
                     let hpLoss = getRnd(2, 3);
-                    att.maxHp -= hpLoss; att.hp = Math.min(att.hp, att.maxHp);
+                    att.maxHp -= hpLoss; 
+                    att.hp = Math.max(0, Math.min(att.hp, att.maxHp)); // ХП не может стать меньше нуля
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Оплата долгов! Платит кровью и навсегда теряет ${hpLoss} Макс. HP!</span><br>`;
                 } else if (att.fClass === "shieldbearer") {
                     applyStatus(att, att, "weakBlock", 2, 0.5); 
@@ -1505,6 +1512,12 @@
                 }
             }
         }
+        
+        // --- ФИКС: Если атакующий убил себя своим же D20 (Маг, Паладин, Пчеловод, Чернокнижник) ---
+        if (!att.isAlive()) {
+            return [d20Msg + `💀 <b>Несчастный случай!</b> ${att.name} погибает до того, как успевает нанести удар!`, "system"];
+        }
+
         // ------------------------------------------
         let zoneText = `<u>${ZONES[aZone].toLowerCase()}</u>`;
         let verb = att.fClass==="rogue"?"вонзает кинжал в":att.fClass==="berserker"?"рубит в":att.fClass==="paladin"?"бьет молотом в":att.fClass==="crossbowman"?"стреляет в":att.fClass==="plague_doctor"?"режет скальпелем в":att.fClass==="shieldbearer"?"бьет щитом в":att.fClass==="samurai"?"рубит катаной в":"бьет посохом в";
@@ -1528,20 +1541,23 @@
                 if (def.effects.weakBlock.a === 2) {
                     let pDmg = Math.min(fixedDmg !== null ? fixedDmg : att.maxDmg, 2);
                     def.takeDamage(pDmg); def.effects.weakBlock.t = 0;
+
+                    if (!isSwarm) def.matchStats.successBlocksByZone[aZone] = (def.matchStats.successBlocksByZone[aZone] || 0) + 1;
+
                     return [d20Msg + `🛡️ ${def.logName} блокирует, но Божий гнев пропустил ${pDmg} урона!`, "hit"];
                 } else if (def.effects.weakBlock.a === 0.5) {
                     isHalfDmg = true; pierceMsg = " 🛡️ Травма: блок поглотил лишь половину урона!"; isBlocked = false; 
                 }
             }
             if (isBlocked) {
+                // --- ПЕРЕНОСИМ ЗАПИСЬ СЮДА: Считаем любой угаданный блок! ---
+                if (!isSwarm) def.matchStats.successBlocksByZone[aZone] = (def.matchStats.successBlocksByZone[aZone] || 0) + 1;
+
                 if (att.fClass === "crossbowman" && fixedDmg === null) {
                     fixedDmg = 2; pierceMsg = " 💥 Тяжелый болт пробивает даже блок!";
                 } else if (att.fClass === "samurai" && att.effects.sharpen.c > 0) {
                     isHalfDmg = true; pierceMsg = " 🔪 Заточенный клинок прорезает блок наполовину!";
                 } else {
-                    // --- ДОБАВЛЯЕМ ЗАПИСЬ УСПЕШНОГО БЛОКА ---
-                    if (!isSwarm) def.matchStats.successBlocksByZone[aZone] = (def.matchStats.successBlocksByZone[aZone] || 0) + 1;
-                    
                     let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
                     if (def.fClass === "paladin") {
                         let healAmt = getRnd(1, 2); def.heal(healAmt); blockMsg += ` ♱ Свет лечит на ${healAmt} HP!`;
