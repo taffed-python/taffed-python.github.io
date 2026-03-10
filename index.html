@@ -8,8 +8,9 @@
 <style>
     /* Палитра: Dark green, Cal Poly green, Vanilla, Gold, Goldenrod */
     body { 
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-        background: #06362D; /* Темный зеленый (Фон) */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    background: #06362D;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Crect width='4' height='4' fill='%23155332'/%3E%3Crect width='1' height='1' fill='%23184d3a' opacity='0.6'/%3E%3C/svg%3E");
         margin: 0; padding: 8px; /* Компактные отступы */
         color: #DEE2B1; /* Ванильный (Основной текст) */
         box-sizing: border-box; line-height: 1.4; 
@@ -26,8 +27,8 @@
     h1, h2, h3 { text-align: center; margin: 0 0 10px 0; font-weight: 600; color: #FFD500; /* Золото */ } 
     h1 { font-size: 22px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
     h2 { font-size: 18px; color: #DEE2B1; }
-    h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #D1A505; padding-bottom: 5px; margin-bottom: 12px; color: #FFD500;}
-    
+    h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #D1A505; padding-bottom: 5px; margin-bottom: 12px; color: #FFD500; background: linear-gradient(90deg, transparent, rgba(209,165,5,0.15), transparent); border-radius: 6px 6px 0 0; padding: 6px 10px 8px;}
+
     /* Кнопки - Золотые и контрастные */
     button { 
         position: relative;
@@ -256,12 +257,19 @@
     .hp-bar { 
         position: absolute;
         top: 0; left: 0; height: 100%; 
-        /* Добавили третий цвет, чтобы градиент зацикливался без рывков */
         background: linear-gradient(90deg, #962d22, #c0392b, #962d22); 
-        background-size: 200% 100%; /* Растягиваем фон */
-        animation: gradient-shift 5s linear infinite; /* Запускаем бесконечный перелив */
+        background-size: 200% 100%;
+        animation: gradient-shift 5s linear infinite;
         transition: width 0.6s ease-in-out;
         z-index: 2;
+    }
+    .hp-bar::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 45%;
+        background: rgba(255,255,255,0.13);
+        border-radius: 8px 8px 0 0;
     }
     /* --- Анимация получения урона */
     @keyframes damage-shake {
