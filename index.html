@@ -261,14 +261,25 @@
     border: 1px solid #D1A505;
 }
 
-/* Фантомная полоска (светло-красная/белая) */
+/* Фантомная полоска (Желтая, объемная) */
 .hp-ghost {
     position: absolute;
     top: 0; left: 0; height: 100%;
-    background: #DEE2B1; /* Цвет ванили, как ваш текст */
-    opacity: 0.4;
-    transition: width 1.2s ease-out; /* Угасает медленнее основной */
+    /* Вертикальный градиент: от светлого золотого к темному для объема */
+    background: linear-gradient(180deg, #FFD500 0%, #D1A505 100%);
+    opacity: 0.85; /* Сделали ярче, убрав сильную прозрачность */
+    transition: width 1.2s ease-out; 
     z-index: 1;
+}
+
+/* Добавляем стеклянный блик сверху, точно как у полоски ХП */
+.hp-ghost::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 45%;
+    background: rgba(255, 255, 255, 0.2); /* Светлое полупрозрачное напыление */
+    border-radius: 8px 8px 0 0;
 }
 
 /* --- Анимация переливания градиента --- */
