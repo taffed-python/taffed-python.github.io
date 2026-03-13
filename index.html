@@ -795,7 +795,7 @@
            <label class="class-card">
                 <input type="radio" name="f_class" value="berserker">
                 <div class="class-header">🪓 Берсерк (60 HP)</div>
-                <div class="class-desc">+1 урон за 12 потерянных HP. Контрудар (25% шанс излечить 3-4 ХП и повесить Кровотечение).</div>
+                <div class="class-desc">+1 урон за 10 потерянных HP. Контрудар (25% шанс излечить 3-4 ХП и повесить Кровотечение).</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Рваная рана (4 Энергии):</b> Обычный урон + Кровотечение (2 ур / 3 хода).<br>
                     <b>Казнь (5 Энергии):</b> Платит 3 HP. 3 урона + 1 доп. урон за каждые 5 потерянных HP.
@@ -804,10 +804,10 @@
             <label class="class-card">
                 <input type="radio" name="f_class" value="mage">
                 <div class="class-header">🔮 Маг (60 HP)</div>
-                <div class="class-desc">+3 урона посохом, если на враге есть любой дебафф.</div>
+                <div class="class-desc">+2 урона посохом, если на враге есть любой дебафф.</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Горящий лёд (4 Маны):</b> 3-5 маг. урона. Вешает Горение (1 ур/2 хода) или Лед (50% промах на 2 хода).<br>
-                    <b>Щит маны (4 Маны):</b> 1 ход отражает 50% любого урона и <b>все</b> негативные эффекты обратно во врага.
+                    <b>Щит маны (4 Маны):</b> 1 ход отражает 40% любого урона и <b>все</b> негативные эффекты обратно во врага.
                 </div></div>
             </label>
             <label class="class-card">
@@ -831,10 +831,10 @@
             <label class="class-card">
                 <input type="radio" name="f_class" value="plague_doctor">
                 <div class="class-header">🧪 Чумной доктор (60 HP)</div>
-                <div class="class-desc">Успешный удар лечит на 1 (по отравленному 2-3) и вешает Яд. 25% отравить атакующего.</div>
+                <div class="class-desc">Успешный удар лечит на 1 (по отравленному 2) и вешает Яд. 25% шанс отравить атакующего.</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Катализатор (5 Маны):</b> 2-3 маг. урона + удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода).<br>
-                    <b>Миазмы (4 Маны):</b> На 2 хода: урон врага снижен на 2, а ваши атаки с шансом 50% игнорируют блок.
+                    <b>Миазмы (4 Маны):</b> На 2 хода: урон врага снижен на 1, а ваши атаки с шансом 40% игнорируют блок.
                 </div></div>
             </label>
             <label class="class-card">
@@ -965,11 +965,11 @@
         ]},
         berserker: { hp: 60, res: "energy", minD: 2, maxD: 7, skills: [
             {id: "torn_wound", name: "🩸 Рваная рана", cost: 4, type: "skill", desc: "Обычный удар и вешает Кровотечение (2 урона на 3 хода)."},
-            {id: "execution", name: "🪓 Казнь", cost: 5, type: "skill", desc: "Платит 3 HP. Наносит 3 базового урона сквозь блок + 1 доп. урон за каждые 5 потерянных вами HP."}
+            {id: "execution", name: "🪓 Казнь", cost: 5, type: "skill", desc: "Платит 2 HP. Наносит 3 базового урона сквозь блок + 1 доп. урон за каждые 5 потерянных вами HP."}
         ]},
         mage: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
             {id: "burning_ice", name: "🔥 Горящий лёд 🧊", cost: 4, type: "skill", desc: "3-5 маг. урона + шанс повесить Горение (1 ур/2 хода) ИЛИ Лед (50% шанс промаха на 2 хода)."},
-            {id: "mana_shield", name: "🛡️ Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 50% получаемого урона и любые статусные эффекты обратно во врага."}
+            {id: "mana_shield", name: "🛡️ Щит маны", cost: 4, type: "skill", desc: "1 ход отражает 40% получаемого урона и любые статусные эффекты обратно во врага."}
         ]},
         paladin: { hp: 60, res: "mana", minD: 4, maxD: 6, skills: [
             {id: "punish", name: "⛓️ Карающий удар", cost: 5, type: "skill", desc: "3-4 физ. + 2-3 маг. урона. Физика блокируется. Снижает урон врага на 2 на 1 ход."},
@@ -981,7 +981,7 @@
         ]},
         plague_doctor: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
             {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона и удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода)."},
-            {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 2, а ваши атаки получают 50% шанс проигнорировать блок."}
+            {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 1, а ваши атаки получают 40% шанс проигнорировать блок."}
         ]},
         warlock: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
             {id: "hex", name: "💀 Сглаз", cost: 4, type: "skill", desc: "Наносит 3-4 маг. урона. Добавляет +2 урона к Проклятию на враге (на 2 хода)."},
@@ -1013,11 +1013,11 @@
 
     const CLASS_INFO = {
         "rogue": "Пассивка: 22% шанс увернуться. 30% шанс нанести двойной удар (50% урона, пробивает блок).",
-        "berserker": "Пассивка: +1 урон за каждые 12 потерянных HP. 25% шанс контрудара (лечит 3-4 ХП и вешает Кровотечение).",
-        "mage": "Пассивка: Атаки посохом наносят на 3 урона больше, если на враге висит любой дебафф.",
+        "berserker": "Пассивка: +1 урон за каждые 10 потерянных HP. 25% шанс контрудара (лечит 3-4 ХП и вешает Кровотечение).",
+        "mage": "Пассивка: Атаки посохом наносят на 2 урона больше, если на враге висит любой дебафф.",
         "paladin": "Пассивка: Удачный блок лечит 1-2 HP. 25% шанс добавить +3 урона магией света при любой атаке.",
         "crossbowman": "Пассивка: 25% шанс прострелить колено (-2 урона врагу). Любой выстрел в блок наносит минимум 2 урона.",
-        "plague_doctor": "Пассивка: Удар лечит 1 ХП (по отравленному 2-3 ХП) и вешает Яд. 25% шанс отравить атакующего при получении урона.",
+        "plague_doctor": "Пассивка: Удар лечит 1 ХП (по отравленному 2 ХП) и вешает Яд. 25% шанс отравить атакующего при получении урона.",
         "warlock": "Пассивка: Успешная атака дает +1 к Проклятию. В конце хода лечит 1 HP, если враг проклят.",
         "shieldbearer": "Пассивка: Любой получаемый урон снижен на 1. 25% шанс дополнительно заблокировать 3-4 урона.",
         "beekeeper": "Пассивка: Удачные атаки копят Рой (до 3). При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.",
@@ -1212,7 +1212,7 @@
     if(e.exhaustion.t>0)html += chip("sb-debuff", "🪫", `⏳${e.exhaustion.t}`,                  st(), `Истощение. Ходов: ${e.exhaustion.t}`);
     if(e.sunder.t > 0)  html += chip("sb-debuff", "💔", `⏳${e.sunder.t}`,                     st(), `Раскол: 50% провал блока. Ходов: ${e.sunder.t}`);
     if(e.sticky.t > 0)  html += chip("sb-debuff", "🍯", `⏳${e.sticky.t}`,                     st(), `Липкие руки: ${Math.round(e.sticky.a*100)}% промах. Ходов: ${e.sticky.t}`);
-    if(e.miasma.t > 0)  html += chip("sb-buff",   "🧪", `⏳${e.miasma.t}`,                     st(), `Миазмы: 50% пробить блок. Ходов: ${e.miasma.t}`);
+    if(e.miasma.t > 0)  html += chip("sb-buff",   "🧪", `⏳${e.miasma.t}`,                     st(), `Миазмы: 40% пробить блок. Ходов: ${e.miasma.t}`);
 
     // Стаки/заряды: без ⏳
     if(e.sharpen.c > 0) html += chip("sb-buff",   "🗡️", `×${e.sharpen.c}`,                    st(), `Заточка: +6 урона. Зарядов: ${e.sharpen.c}`);
@@ -1438,8 +1438,8 @@
         let reflectMsg = "";
         
         if (target.effects.shield.t > 0 && !isDot) {
-            let reflect = Math.ceil(finalDmg / 2);
-            finalDmg = Math.floor(finalDmg / 2);
+            let reflect = Math.ceil(finalDmg * 0.4);
+            finalDmg = Math.floor(finalDmg * 0.4);
             target.takeDamage(finalDmg);
             caster.takeDamage(reflect);
             reflectMsg = ` 🛡️ Щит маны отражает ${reflect} урона!`;
@@ -1480,7 +1480,7 @@
                     d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Берсерко-крит: урон будет умножен на 1.5!</span><br>`;
                 } else if (att.fClass === "mage") {
                     if (isBasic) d20DmgBonus += 2;
-                    applyStatus(att, def, "ice", 1);
+                    applyStatus(att, def, "ice", att.isBot ? 2 : 1);
                     d20Msg = `<span style='color:#2ecc71'>🍀 СВЕЗЛО! Посохом в глазень! +2 урона, враг приложил холодное на ушиб, 50% промаха (Лед)!</span><br>`;
                 } else if (att.fClass === "paladin") {
                     let amt = getRnd(2, 3);
@@ -1522,7 +1522,7 @@
                     att.takeDamage(2); att.res = Math.max(0, att.res - 1);
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Перегрев посоха! Маг получает 2 урона и теряет 1 ману!</span><br>`;
                 } else if (att.fClass === "paladin") {
-                    att.takeDamage(2); att.effects.weakBlock = {t: 1, a: 2};
+                    att.takeDamage(2); att.effects.weakBlock = {t: 99, a: 2};
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Боги гневаются на Паладина! Молния с неба наносит 2 урона, следующий блок пропустит 2 урона!</span><br>`;
                 } else if (att.fClass === "crossbowman") {
                     if (isBasic) att.crossbowJam = true;
@@ -1533,17 +1533,17 @@
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Госпитализация! Доктор 100% провалит свой блок в этом ходу!</span><br>`;
                 } else if (att.fClass === "warlock") {
                     let hpLoss = getRnd(2, 3);
-                    att.maxHp -= hpLoss; 
+                    att.takeDamage(hpLoss); 
                     att.hp = Math.max(0, Math.min(att.hp, att.maxHp)); // ХП не может стать меньше нуля
-                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Оплата долгов! Чернокнижник платит кровью и навсегда теряет ${hpLoss} Макс. HP!</span><br>`;
+                    d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Оплата долгов! Чернокнижник платит кровью и теряет ${hpLoss} HP!</span><br>`;
                 } else if (att.fClass === "shieldbearer") {
-                    applyStatus(att, att, "weakBlock", 2, 0.5); 
+                    applyStatus(att, att, "weakBlock", att.isBot ? 3 : 2, 0.5); 
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Уронил щит на ногу! 2 хода любой блок режет урон лишь на 50%!</span><br>`;
                 } else if (att.fClass === "beekeeper") {
                     att.takeDamage(2); att.swarm = 0;
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Пчелы взбунтовались! Укусили хозяина на 2 урона, Рой разлетелся!</span><br>`;
                 } else if (att.fClass === "samurai") {
-                    d20DmgBonus -= 2; applyStatus(att, att, "sunder", 1, 0.5);
+                    d20DmgBonus -= 2; applyStatus(att, att, "sunder", att.isBot ? 2 : 1, 0.5);
                     d20Msg = `<span style='color:#e74c3c'>🤬 ЗАПАДЛО! Перепил саке? Получи самурайского леща от жены. Урон снижен на 2, шанс провала блока 50%!</span><br>`;
                 }
             }
@@ -1566,10 +1566,18 @@
         let isBlocked = bZones.includes(aZone.toString());
         let pierceMsg = "";
         
-        if (def.skipBlock) { isBlocked = false; pierceMsg = " 🏥 Госпитализация! Блок провален!"; def.skipBlock = false; }
+        // --- УМНАЯ ГОСПИТАЛИЗАЦИЯ ---
+        if (def.skipBlock) {
+            if (isBlocked) {
+                isBlocked = false; 
+                pierceMsg = " 🏥 Госпитализация! Блок провален!"; 
+            }
+            def.skipBlock = false; // Снимаем дебафф после первого же полученного удара
+        }
+        
         if (isBlocked && def.effects.sunder.t > 0 && Math.random() < def.effects.sunder.a) { isBlocked = false; pierceMsg = " 💔 Раскол пробивает блок!"; }
         if (att.effects.unblockable && att.effects.unblockable.t > 0) { isBlocked = false; pierceMsg = " 👺 Удар из тени игнорирует блок!"; att.effects.unblockable.t = 0; }
-        if (isBlocked && att.fClass === "plague_doctor" && att.effects.miasma.t > 0 && Math.random() < 0.5) { isBlocked = false; pierceMsg = " 🧪 Токсичные испарения обходят блок!"; }
+        if (isBlocked && att.fClass === "plague_doctor" && att.effects.miasma.t > 0 && Math.random() < 0.4) { isBlocked = false; pierceMsg = " 🧪 Токсичные испарения обходят блок!"; }
 
         if(isBlocked && !ignoreBlock) {
             // D20: Штрафы на блок Паладина и Щитоносца
@@ -1619,20 +1627,20 @@
         dmg += d20DmgBonus; // Бонус от СВЕЗЛО
         if (att.crossbowJam) dmg = Math.min(1, Math.max(0, dmg)); // Штраф Арбалетчика
 
-        if (att.fClass === "mage" && def.hasAnyDebuff()) { dmg += 3; verb = "бьет светящимся посохом в"; }
+        if (att.fClass === "mage" && def.hasAnyDebuff()) { dmg += 2; verb = "бьет светящимся посохом в"; }
         if (att.fClass === "samurai" && fixedDmg === null) {
             dmg += att.samuraiBonus;
             if (att.effects.sharpen.c > 0) { dmg += 5; att.effects.sharpen.c--; gainMsg += " 🔪 Смертельная сталь (+5)!"; }
         }
         if (att.fClass === "berserker" && fixedDmg === null) {
-            let fury = Math.floor((att.maxHp - att.hp) / 12);
+            let fury = Math.floor((att.maxHp - att.hp) / 10);
             if(fury > 0) { dmg += fury; gainMsg += ` 😡 Ярость (+${fury})!`; }
         }
 
         if(att.effects.dmgDebuff.t > 0) dmg = Math.max(1, dmg - att.effects.dmgDebuff.a);
 
         let isCrit = att.fClass === "berserker" && Math.random() < att.critChance;
-        if (att.megaCrit) { dmg = Math.floor(dmg * 1.5); att.megaCrit = false; } // Мега-крит Берсерка
+        if (att.megaCrit) { dmg = Math.floor(dmg * 1.5); att.megaCrit = false; isCrit = true; } // Теперь визуал сработает!
         else if (isCrit) dmg *= 2;
 
         if (isCrit) {
@@ -1644,9 +1652,12 @@
         let finalDmg = applyVuln(def, mit.finalDmg);
 
         // Хэдшот Арбалетчика
-        if (!isBlocked && att.headshot && fixedDmg === null) {
-            applyStatus(att, def, "vuln", 2, 0.15); att.headshot = false; gainMsg += " 🎯 Хэдшот! Враг уязвим!";
-        }        
+        if (att.headshot && fixedDmg === null) {
+            if (!isBlocked) {
+                applyStatus(att, def, "vuln", 2, 0.15); gainMsg += " 🎯 Хэдшот! Враг уязвим!";
+            }
+            att.headshot = false; // Тратим в любом случае!
+        }      
         // --- ВСТАВИТЬ РОСТ РОЯ СЮДА ---
         if (att.fClass === "beekeeper" && fixedDmg === null && finalDmg > 0) {
             att.swarm = Math.min(3, att.swarm + 1);
@@ -1656,8 +1667,8 @@
         
         let reflectMsg = "";
         if (def.effects.shield.t > 0) {
-            let reflect = Math.ceil(finalDmg / 2);
-            finalDmg = Math.floor(finalDmg / 2);
+            let reflect = Math.ceil(finalDmg * 0.4);
+            finalDmg = Math.floor(finalDmg * 0.4);
             def.takeDamage(finalDmg);
             att.takeDamage(reflect);
             reflectMsg = ` 🛡️ Щит маны отражает ${reflect} урона!`;
@@ -1680,7 +1691,7 @@
             msg += ` ☀️ Вспышка Света (${r.dmg} ур)!${r.msg}`;
         }
         if (att.fClass === "plague_doctor" && fixedDmg === null) {
-            let healAmt = def.effects.poison.t > 0 ? getRnd(2, 3) : 1;
+            let healAmt = def.effects.poison.t > 0 ? 2 : 1; // Всегда 1, а по отравленному 2
             att.heal(healAmt);
             let sMsg = applyStatus(att, def, "poison", 2, 1, true); 
             msg += ` 🩸 Вампиризм (+${healAmt} HP)! ⚗️ Яд усилен.${sMsg}`;
@@ -1780,7 +1791,7 @@
         }
         
         else if (skillId === "execution") {
-            caster.takeDamage(3); 
+            caster.takeDamage(2); 
             
             // <-- ДОБАВЛЯЕМ ПРОВЕРКУ НА СМЕРТЬ -->
             if (!caster.isAlive()) {
@@ -1792,7 +1803,7 @@
             let bonusDmg = Math.floor(missingHp / 5); 
             let totalDmg = 3 + bonusDmg; 
             let r = dealSkillDamage(caster, target, totalDmg, false);
-            logMsg(`🪓 ${cName} проводит жестокую Казнь! Теряет 3 HP, но наносит ${r.dmg} урона (Бонус от ран: +${bonusDmg}).${r.msg}`, "crit");
+            logMsg(`🪓 ${cName} проводит жестокую Казнь! Теряет 2 HP, но наносит ${r.dmg} урона (Бонус от ран: +${bonusDmg}).${r.msg}`, "crit");
         }
         else if(skillId === "propolis") {
             let r = dealSkillDamage(caster, target, getRnd(2, 3), false);
@@ -1848,7 +1859,7 @@
         }
         else if(skillId === "miasma") {
             caster.effects.miasma = {t:2};
-            let sMsg = applyStatus(caster, target, "dmgDebuff", 2, 2);
+            let sMsg = applyStatus(caster, target, "dmgDebuff", 2, 1);
             logMsg(`😵 ${cName} распыляет Миазмы! Урон врага снижен на 2. Атаки доктора обретают пробивную силу.${sMsg}`, "spell");
         }
         else if(skillId === "burning_ice") {
@@ -2087,7 +2098,6 @@
         logMsg(`<br>[--- РАУНД ${roundNum} ---]`, "system");
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
         player.d20Rolled = bot.d20Rolled = false;
-        player.skipBlock = bot.skipBlock = false;
         player.crossbowJam = bot.crossbowJam = false;
         
         // Сбрасываем счетчики перед началом нового раунда
