@@ -1396,10 +1396,16 @@
     function applyStatus(caster, target, type, t, a = 0, isDot = false) {
         let realTarget = target;
         let msg = "";
-        // Проверяем Щит Маны
+        
+        // --- ОБНОВЛЕННАЯ ЛОГИКА ЩИТА МАНЫ ---
         if (caster !== target && target.effects.shield.t > 0) {
-            realTarget = caster;
-            msg = " 🛡️ Щит маны отразил эффект!";
+            // Генерируем случайное число от 0 до 1. Если меньше 0.5 — отражаем.
+            if (Math.random() < 0.5) {
+                realTarget = caster;
+                msg = " 🛡️ Щит маны отразил эффект!";
+            } else {
+                msg = " 🛡️ Щит маны не успел среагировать на эффект!";
+            }
         }
         
         if (isDot) {
@@ -1413,7 +1419,6 @@
             realTarget.effects[type] = { t: t, a: a };
         }
 
-        // --- НОВАЯ ЛОГИКА: Запоминаем последний негативный статус ---
         const badStatuses = ["burn", "poison", "bleed", "curse", "ice", "dmgDebuff", "vuln", "exhaustion", "sunder", "sticky", "miasma", "healDebuff"];
         if (badStatuses.includes(type)) {
             realTarget.latestDebuff = type;
@@ -1421,6 +1426,7 @@
 
         return msg;
     }
+    
     function applyVuln(target, dmg) {
         return target.effects.vuln.t > 0 ? Math.round(dmg * (1 + target.effects.vuln.a)) : dmg;
     }
