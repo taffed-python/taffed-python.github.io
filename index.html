@@ -42,9 +42,9 @@
     }
     
     h1, h2, h3 { text-align: center; margin: 0 0 10px 0; font-weight: 600; color: #FFD500; /* Золото */ } 
-    h1 { font-size: 22px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
-    h2 { font-size: 18px; color: #DEE2B1; }
-    h3 { font-size: 14px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #D1A505; padding-bottom: 5px; margin-bottom: 12px; color: #FFD500; background: linear-gradient(90deg, transparent, rgba(209,165,5,0.15), transparent); border-radius: 6px 6px 0 0; padding: 6px 10px 8px;}
+    h1 { font-size: 23px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    h2 { font-size: 19px; color: #DEE2B1; }
+    h3 { font-size: 15px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid #D1A505; padding-bottom: 5px; margin-bottom: 12px; color: #FFD500; background: linear-gradient(90deg, transparent, rgba(209,165,5,0.15), transparent); border-radius: 6px 6px 0 0; padding: 6px 10px 8px;}
 
     /* Кнопки - Золотые и контрастные */
     button { 
@@ -54,7 +54,7 @@
         background: #D1A505; /* Goldenrod */
         color: #06362D; /* Темно-зеленый текст для контраста */
         border: 2px solid #FFD500; /* Золотая обводка */
-        padding: 12px 20px; font-size: 16px; font-weight: 700; 
+        padding: 12px 20px; font-size: 17px; font-weight: 700; 
         border-radius: 8px; cursor: pointer; display: block; margin: 10px auto; width: 100%; 
         box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: 0.2s; 
     }
@@ -81,7 +81,7 @@
     
     /* Индивидуальные цвета кнопок действий */
     #btn-fight { 
-        background: #D1A505; font-size: 18px; border-width: 3px; 
+        background: #D1A505; font-size: 19px; border-width: 3px; 
     }
     #btn-fight:hover { background: #FFD500; border-color: #DEE2B1; }
     
@@ -94,7 +94,7 @@
     /* Кнопка "Сменить класс" (Второстепенная - цвет Cal Poly green) */
     #btn-switch { 
         background: #155332; color: #DEE2B1; border: 2px solid #155332; 
-        font-size: 14.5px; padding: 10px 20px;
+        font-size: 15.5px; padding: 10px 20px;
     }
     #btn-switch:hover { background: #084a3e; border-color: #D1A505; }
     
@@ -122,8 +122,8 @@
         transform: translateY(-2px); /* Карточка слегка "приподнимается" */
     }
 
-    .class-header { font-weight: 700; font-size: 16px; margin-bottom: 6px; color: #FFD500; text-align: center; }
-    .class-desc { color: #DEE2B1; font-size: 13px; line-height: 1.4; text-align: center; }
+    .class-header { font-weight: 700; font-size: 17px; margin-bottom: 6px; color: #FFD500; text-align: center; }
+    .class-desc { color: #DEE2B1; font-size: 14px; line-height: 1.4; text-align: center; }
     
     /* 3. Магия анимации навыков (скрыты по умолчанию) */
     .skills-reveal {
@@ -149,7 +149,7 @@
 
     /* Внутренний стиль выехавшего блока навыков */
     .skills-inner {
-        font-size: 12.5px; color: #DEE2B1; 
+        font-size: 13.5px; color: #DEE2B1; 
         background: #06362D; padding: 10px; 
         border-radius: 6px; border: 1px solid #155332; 
         border-left: 3px solid #D1A505;
@@ -242,7 +242,7 @@
     position: absolute; 
     width: 100%; 
     text-align: center; 
-    font-size: 11px; 
+    font-size: 12px; 
     line-height: 16px; 
     color: #fff; 
     font-weight: bold; 
@@ -365,7 +365,7 @@
     padding: 4px 7px;
     background: #06362D;
     color: #DEE2B1;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1;
     border-left: 1px solid rgba(0,0,0,0.3);
 }
@@ -403,7 +403,7 @@
         flex: 1 1 0px; /* Магия Flexbox: занимает остаток высоты левой колонки, но НЕ растягивает её контентом */
         min-height: 250px; /* Чтобы не сплющило, если правая панель вдруг станет короткой */
         overflow-y: auto; background: #06362D; color: #DEE2B1; padding: 12px; 
-        border-radius: 10px; font-size: 13.5px; font-family: "SF Mono", Monaco, Consolas, monospace; 
+        border-radius: 10px; font-size: 14.5px; font-family: "SF Mono", Monaco, Consolas, monospace; 
         border: 1px solid #D1A505; box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
     }
     
@@ -568,13 +568,13 @@
         .start-options { grid-template-columns: 1fr; gap: 8px; }
         
         .avatar { width: 105px; height: 105px; border-radius: 14px; } /* Увеличили на 10% (было 95px) */
-        h1 { font-size: 20px; }
+        h1 { font-size: 21px; }
         .stats-panel { padding: 10px; }
         
         /* --- Кнопка сворачивания лога (видна только на мобильных) --- */
         .log-toggle-btn { 
             display: flex; justify-content: space-between; align-items: center;
-            background: #155332; color: #FFD500; font-weight: bold; font-size: 14px;
+            background: #155332; color: #FFD500; font-weight: bold; font-size: 15px;
             padding: 8px 15px; border: 1px solid #D1A505; border-bottom: none;
             border-radius: 10px 10px 0 0; cursor: pointer;
         }
@@ -593,7 +593,7 @@
             height: 40vh; min-height: 250px; max-height: 50vh; padding: 8px; font-size: 12px;
         }
         
-        .control-box label { padding: 8px 10px; font-size: 12.5px; }
+        .control-box label { padding: 8px 10px; font-size: 14.5px; }
         
         /* Делаем блок кнопок неуязвимым для багов Iframe */
         .action-buttons { 
@@ -609,14 +609,14 @@
         }
         
         /* Кнопка боя на телефоне будет крупнее и удобнее для пальца */
-        #btn-fight { margin: 0; padding: 14px; font-size: 17px; }
+        #btn-fight { margin: 0; padding: 14px; font-size: 18px; }
         #btn-next, #btn-switch { margin: 0; padding: 10px; font-size: 14px; }
     }
     /* --- Улучшение читаемости имен Игрока и Врага --- */
     #p-name {
         color: #76D7C4 !important; /* Яркий бирюзовый/мятный оттенок */
         font-weight: 700;
-        font-size: 15.5px;
+        font-size: 16.5px;
         letter-spacing: 0.5px;
         text-shadow: 0 2px 5px rgba(0,0,0,0.9); /* Плотная тень, чтобы отделить от фона */
         margin-bottom: 4px;
@@ -629,7 +629,7 @@
     #b-name {
         color: #F1948A !important; /* Светлый кораллово-красный оттенок */
         font-weight: 700;
-        font-size: 15.5px;
+        font-size: 16.5px;
         letter-spacing: 0.5px;
         text-shadow: 0 2px 5px rgba(0,0,0,0.9); /* Плотная тень */
         margin-bottom: 4px;
