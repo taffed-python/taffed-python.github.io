@@ -2000,106 +2000,269 @@
         let pBlocks = getRadioVal("block", "1,2").split(","); 
         let pSpell = getRadioVal("spell", "none");
         
-        // 1. ЗАПОМИНАЕМ ДЕЙСТВИЯ ИГРОКА (храним последние 5 ходов)
-        playerAttackHistory.push(pAtt);
-        if (playerAttackHistory.length > 5) playerAttackHistory.shift();
-        player.matchStats.attacksByZone[pAtt]++;
+        // --- ИСПРАВЛЕНИЕ АМНЕЗИИ: Записываем историю ходов ДО логики бота ---
+        playerAttackHistory.push(Number(pAtt));
+        playerBlockHistory.push(pBlocks);
+        
+        // --- ЛОГИКА ДЕЙСТВИЙ БОТА ---
+        let bAtt, bBlocks, bSpell = "none";
 
-        // Запоминаем блоки (игнорируем ходы, когда игрок медитировал)
-        if (pBlocks[0] !== "meditation") {
-            playerBlockHistory.push(pBlocks);
-            if (playerBlockHistory.length > 5) playerBlockHistory.shift();
-            pBlocks.forEach(z => player.matchStats.blocksByZone[z]++);
-        }
+// Сначала считаем "умный блок" (общий для всех)
+let smartBlock = null;
+if (playerAttackHistory.length >= 5) {
+    let counts = [0, 0, 0, 0];
+    playerAttackHistory.forEach(z => counts[z - 1]++);
+    let total = playerAttackHistory.length;
+    let rand = Math.random();
+    let cumulative = 0;
+    let predictedZone = 1;
+    for (let i = 0; i < counts.length; i++) {
+        cumulative += counts[i] / total;
+        if (rand < cumulative) { predictedZone = i + 1; break; }
+    }
+    let possibleBlocks = ["1,2", "2,3", "3,4", "1,4"].filter(b => b.includes(predictedZone.toString()));
+    smartBlock = possibleBlocks[Math.floor(Math.random() * possibleBlocks.length)].split(",");
+}
 
-        // 2. УМНАЯ АТАКА БОТА (Поиск уязвимостей)
-        let bAtt;
-        // Если накопилась история и сработал шанс 70% - бот анализирует ваши блоки
-        if (playerBlockHistory.length >= 3 && Math.random() < 0.70) {
-            let blockCounts = {1:0, 2:0, 3:0, 4:0};
-            // Считаем, сколько раз Игрок закрывал каждую зону
-            playerBlockHistory.forEach(blocks => {
-                blocks.forEach(zone => blockCounts[zone]++);
-            });
-            
-            // Находим минимальное количество блоков
-            let minBlocks = 999;
-            for (let i = 1; i <= 4; i++) {
-                if (blockCounts[i] < minBlocks) minBlocks = blockCounts[i];
-            }
-            
-            // Собираем все зоны, которые Игрок защищает РЕЖЕ ВСЕГО
-            let vulnerableZones = [];
-            for (let i = 1; i <= 4; i++) {
-                if (blockCounts[i] === minBlocks) vulnerableZones.push(i);
-            }
-            
-            // Бьем в одну из самых открытых зон
-            bAtt = pickRandom(vulnerableZones);
-        } else {
-            // Либо бьем случайно (чтобы бот не был 100% предсказуемым)
-            bAtt = Math.floor(Math.random() * 4) + 1;
-        }
-        
-        // 3. УМНЫЙ БЛОК БОТА
-        let bBlocks;
-        
-        // --- ИИ-ФИЛЬТРЫ МЕДИТАЦИИ ---
-        // 3.1. Когда открывать лицо КАТЕГОРИЧЕСКИ НЕЛЬЗЯ:
-        let isPaladinThorns = bot.effects.thorns && bot.effects.thorns.t > 0; // Нужен блок для шипов Паладина
-        let isVulnerable = bot.effects.vuln && bot.effects.vuln.t > 0; // Бот под уязвимостью
-        let isLowHp = bot.hp <= 12; // Смертельно мало ХП
-        let isEnemySharpened = player.effects.sharpen && player.effects.sharpen.c > 0; // Игрок заточил катану
-        
-        let shouldNotMeditate = isPaladinThorns || isVulnerable || isLowHp || isEnemySharpened;
+// ТЕПЕРЬ РАЗДЕЛЯЕМ ПО КЛАССАМ
+if (bot.fClass === "samurai") {
+    // СТРАТЕГИЯ САМУРАЯ
+    bAtt = (bot.effects.sharpen && bot.effects.sharpen.c > 0) || bot.samuraiBonus > 0 ? predictWeakestZone(playerBlockHistory) : Math.floor(Math.random() * 4) + 1;
+    
+    if (bot.res < 3 && !bot.cooldowns["shadow_stance"]) {
+        bSpell = "shadow_stance";
+    } else if (bot.res >= 4 && (!bot.effects.sharpen || bot.effects.sharpen.c === 0) && !bot.cooldowns["sharpen"]) {
+        bSpell = "sharpen";
+    }
 
-        // 3.2. Когда медитировать ИДЕАЛЬНО (защитные баффы на нас):
-        let isSuperSafe = (bot.effects.pacified && bot.effects.pacified.t > 0) || 
-                          (bot.effects.shield && bot.effects.shield.t > 0);
+    if (bot.res < 5 && bot.hp > 20 && Math.random() < 0.3) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+} 
+else if (bot.fClass === "berserker") {
+    // СТРАТЕГИЯ БЕРСЕРКА
+    bAtt = Math.floor(Math.random() * 4) + 1;
 
-        if (!shouldNotMeditate && ((bot.maxRes - bot.res >= 4 && Math.random() < 0.25) || (isSuperSafe && bot.res < bot.maxRes))) {
-            bBlocks = ["meditation"]; 
-        } else {
-            let smartBlock = null;
-            // Умный блок: анализируем историю атак игрока
-            if (playerAttackHistory.length >= 3 && Math.random() < 0.75) { 
-                let counts = {1:0, 2:0, 3:0, 4:0};
-                playerAttackHistory.forEach(z => counts[z]++);
-                let favoriteZone = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-                
-                let possibleBlocks = ["1,2", "2,3", "3,4", "1,4"].filter(b => b.includes(favoriteZone.toString()));
-                if (possibleBlocks.length > 0) {
-                    smartBlock = possibleBlocks[Math.floor(Math.random() * possibleBlocks.length)].split(",");
-                }
-            }
-            // Если бот не смог прочитать ваши атаки, ставит случайный блок
-            bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random()*4)].split(",");
-        }
-        
-        // 4. УМНОЕ ИСПОЛЬЗОВАНИЕ НАВЫКОВ БОТА
-        let bSpell = "none";
-        let botSpells = [];
-        
-        // Пьет зелье ТОЛЬКО если ХП упало ниже 40%
-        if(bot.hasPotion && bot.hp < bot.maxHp * 0.4) botSpells.push("potion");
-        
-        C_DATA[bot.fClass].skills.forEach(s => { 
-            if(bot.res >= s.cost && !bot.cooldowns[s.id]) {
-                let isSmart = true;
-                
-                // --- ИИ-ФИЛЬТРЫ: Отсекаем глупые решения ---
-                if (s.id === "catalyst" && (!player.effects.poison || player.effects.poison.t === 0)) isSmart = false; // Нет яда - нет Катализатора
-                if (s.id === "execution" && (bot.maxHp - bot.hp) < 10) isSmart = false; // Казнь только если потеряно хотя бы 10 ХП
-                if (s.id === "honey" && (bot.maxHp - bot.hp) < 4) isSmart = false; // Не жрет мед при полном ХП
-                if (s.id === "sharpen" && bot.effects.sharpen && bot.effects.sharpen.c > 0) isSmart = false; // Не точит уже острый меч
-                if (s.id === "shadow_stance" && bot.effects.unblockable && bot.effects.unblockable.t > 0) isSmart = false; 
-                
-                if (isSmart) botSpells.push(s.id); 
-            }
-        });
-        
-        // Если бот нашел "умные" скиллы, шанс их применить повышен до 75%
-        if(botSpells.length > 0 && Math.random() < 0.75) bSpell = pickRandom(botSpells);
+    if (bot.res >= 5 && bot.hp > 15 && !bot.cooldowns["execution"]) {
+        bSpell = "execution"; 
+    } else if (bot.res >= 4 && !bot.cooldowns["torn_wound"]) {
+        bSpell = "torn_wound"; 
+    }
+
+    if (Math.random() < 0.15) {
+        bBlocks = ["meditation"]; 
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+} 
+
+else if (bot.fClass === "shieldbearer") {
+    // 1. АТАКА: Ищет дыру в твоей защите, если на тебе висит "Раскол"
+    if (player.effects.sunder && player.effects.sunder.t > 0) {
+        bAtt = predictWeakestZone(playerBlockHistory);
+    } else {
+        bAtt = Math.floor(Math.random() * 4) + 1;
+    }
+
+    // 2. НАВЫКИ: Душный контроль
+    bSpell = "none";
+    // Если на игроке НЕТ истощения — это цель №1
+    if (bot.res >= 5 && (!player.effects.exhaustion || player.effects.exhaustion.t === 0) && !bot.cooldowns["shield_bash"]) {
+        bSpell = "shield_bash";
+    } 
+    // Если игрок часто блокируется и на нем нет Раскола — Пригвоздить
+    else if (bot.res >= 5 && (!player.effects.sunder || player.effects.sunder.t === 0) && !bot.cooldowns["pin"]) {
+        bSpell = "pin";
+    }
+
+    // 3. ЗАЩИТА: Очень надежная
+    // Если энергии мало — медитирует, но только если у игрока тоже мало ресурсов (чтобы не получить сильный удар)
+    if (bot.res < 5 && player.res < 6 && Math.random() < 0.4) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "paladin") {
+    // 1. АТАКА: Бьет случайно, упор на пассивку (25% шанс +3 урона светом)
+    bAtt = Math.floor(Math.random() * 4) + 1;
+
+    // 2. НАВЫКИ: Поддержание баффа и наказание
+    bSpell = "none";
+    // Если "Святая клятва" не активна — это приоритет (шипы на блоке)
+    if (bot.res >= 4 && (!bot.effects.thorns || bot.effects.thorns.t === 0) && !bot.cooldowns["oath"]) {
+        bSpell = "oath";
+    } 
+    // Если клятва уже висит, бьет Карой
+    else if (bot.res >= 5 && !bot.cooldowns["punish"]) {
+        bSpell = "punish";
+    }
+
+    // 3. ЗАЩИТА: Паладин ОЧЕНЬ редко медитирует
+    // Ему выгодно блокировать, так как блок дает ему ХИЛ и УРОН по врагу
+    if (bot.res < 3 && bot.hp > 40 && Math.random() < 0.2) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "mage") {
+    // 1. АТАКА: Если на игроке есть дебафф, бьет прицельно (урон повышен)
+    if (player.hasAnyDebuff()) {
+        bAtt = predictWeakestZone(playerBlockHistory);
+    } else {
+        bAtt = Math.floor(Math.random() * 4) + 1;
+    }
+
+    // 2. НАВЫКИ: Защита и поджог
+    bSpell = "none";
+    // Если у игрока много маны/энергии (шанс сильного навыка) — ставим Щит
+    if (bot.res >= 4 && player.res >= 5 && !bot.cooldowns["mana_shield"] && Math.random() < 0.6) {
+        bSpell = "mana_shield";
+    } 
+    // Иначе атакуем магией
+    else if (bot.res >= 4 && !bot.cooldowns["burning_ice"]) {
+        bSpell = "burning_ice";
+    }
+
+    // 3. ЗАЩИТА: Маг часто медитирует, так как мана — его жизнь
+    if (bot.res < 4 && Math.random() < 0.4) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "crossbowman") {
+    // 1. АТАКА: Арбалетчик ищет открытые зоны для максимального урона
+    bAtt = predictWeakestZone(playerBlockHistory);
+
+    // 2. НАВЫКИ: Выбор между стабильностью и риском
+    bSpell = "none";
+    // Если у игрока мало HP, бот рискует с Lucky Strike (урон до 14)
+    if (bot.res >= 4 && player.hp < 15 && !bot.cooldowns["lucky_strike"]) {
+        bSpell = "lucky_strike";
+    } 
+    // Если на игроке нет горения — поджигает
+    else if (bot.res >= 4 && (!player.effects.burn || player.effects.burn.t === 0) && !bot.cooldowns["incendiary"]) {
+        bSpell = "incendiary";
+    }
+    // В остальных случаях — шанс на Lucky Strike для пробития блока
+    else if (bot.res >= 4 && Math.random() < 0.5 && !bot.cooldowns["lucky_strike"]) {
+        bSpell = "lucky_strike";
+    }
+
+    // 3. ЗАЩИТА: Средняя осторожность
+    if (bot.res < 4 && Math.random() < 0.25) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "plague_doctor") {
+    // 1. АТАКА: Доктор бьет туда, где меньше блоков, чтобы гарантированно лечиться
+    bAtt = predictWeakestZone(playerBlockHistory);
+
+    // 2. НАВЫКИ: Управление заражением
+    bSpell = "none";
+    // Если на игроке есть Яд и маны хватает на Катализатор — удваиваем урон
+    if (bot.res >= 5 && player.effects.poison.t > 0 && !bot.cooldowns["catalyst"]) {
+        bSpell = "catalyst";
+    } 
+    // Если "Миазмы" не активны — выпускаем газ для дебаффа врага
+    else if (bot.res >= 4 && (!bot.effects.miasma || bot.effects.miasma.t === 0) && !bot.cooldowns["miasma"]) {
+        bSpell = "miasma";
+    }
+
+    // 3. ЗАЩИТА: Доктор может позволить себе риск, так как он постоянно хилится
+    if (bot.res < 4 && bot.hp < 30 && Math.random() < 0.3) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "beekeeper") {
+    // 1. АТАКА: Пчеловод бьет туда, где меньше блоков, чтобы растить Рой
+    bAtt = predictWeakestZone(playerBlockHistory);
+
+    // 2. НАВЫКИ: Поддержание Роя и выживание
+    bSpell = "none";
+    // Если HP критическое — лечится (даже ценой Роя)
+    if (bot.res >= 5 && bot.hp < 20 && !bot.cooldowns["honey"]) {
+        bSpell = "honey";
+    } 
+    // Если на игроке нет дебаффа "Липкие руки" — заклеивает обзор
+    else if (bot.res >= 4 && (!player.effects.sticky || player.effects.sticky.t === 0) && !bot.cooldowns["propolis"]) {
+        bSpell = "propolis";
+    }
+
+    // 3. ЗАЩИТА: Пчеловод часто медитирует, так как его пассивка (Воск) работает всегда
+    // Ему выгодно накопить энергию на "Медок" на всякий случай
+    if (bot.res < 5 && Math.random() < 0.35) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "rogue") {
+    // 1. АТАКА: Разбойник бьет туда, где ты меньше всего ждешь
+    bAtt = predictWeakestZone(playerBlockHistory);
+
+    // 2. НАВЫКИ: Грязные приемы
+    bSpell = "none";
+    // Если на игроке нет Слепоты — это главный приоритет Разбойника
+    if (bot.res >= 4 && (!player.effects.blind || player.effects.blind.t === 0) && !bot.cooldowns["blind_powder"]) {
+        bSpell = "blind_powder";
+    } 
+    // Если игрок уже ослеплен, вешаем Уязвимость через Подсечку
+    else if (bot.res >= 4 && !bot.cooldowns["sweep"]) {
+        bSpell = "sweep";
+    }
+
+    // 3. ЗАЩИТА: Разбойник почти никогда не медитирует
+    // Он надеется на свои 22% уворота, которые приносят ему энергию в бою
+    if (bot.hp < 15 && Math.random() < 0.2) {
+        bBlocks = ["meditation"];
+    } else {
+        bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    }
+}
+else if (bot.fClass === "warlock") {
+    // 1. АТАКА: Чернокнижник бьет в торс (самая широкая зона для шанса на Проклятие)
+    bAtt = Math.random() < 0.6 ? 2 : 3;
+
+    // 2. НАВЫКИ: Поддержание жизни и усиление порчи
+    bSpell = "none";
+    // Если ХП мало — включаем режим выживания (Броня)
+    if (bot.res >= 5 && bot.hp < 20 && !bot.cooldowns["dark_armor"]) {
+        bSpell = "dark_armor";
+    } 
+    // Если на игроке нет Проклятия или оно слабое — усиливаем его Сглазом
+    else if (bot.res >= 4 && (!player.effects.curse || player.effects.curse.a < 3) && !bot.cooldowns["hex"]) {
+        bSpell = "hex";
+    }
+
+    // 3. ЗАЩИТА: Чернокнижник редко медитирует, он полагается на пассивный реген
+    bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+}
+else {
+    // ДЛЯ ВСЕХ ОСТАЛЬНЫХ
+    bAtt = Math.floor(Math.random() * 4) + 1;
+    bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
+    
+    let botSpells = [];
+    if(bot.hasPotion && bot.hp < bot.maxHp * 0.4) botSpells.push("potion");
+    C_DATA[bot.fClass].skills.forEach(s => { 
+        if(bot.res >= s.cost && !bot.cooldowns[s.id]) botSpells.push(s.id); 
+    });
+    if(botSpells.length > 0 && Math.random() < 0.75) bSpell = pickRandom(botSpells);
+    // УНИВЕРСАЛЬНАЯ АПТЕЧКА ДЛЯ ВСЕХ БОТОВ
+// Если ХП критическое, зелье есть, а бот не запланировал важный защитный навык
+if (bot.hasPotion && bot.hp <= 20 && !["mana_shield", "dark_armor", "honey"].includes(bSpell)) {
+    bSpell = "potion";
+}
+}
 
         logMsg(`<br>[--- РАУНД ${roundNum} ---]`, "system");
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
@@ -2320,6 +2483,16 @@
     function closeStatsModal() {
         document.getElementById("stats-modal").classList.remove("show");
     }
+
+function predictWeakestZone(history) {
+    if (history.length < 3) return Math.floor(Math.random() * 4) + 1;
+    let counts = {1:0, 2:0, 3:0, 4:0};
+    history.forEach(blockSet => {
+        blockSet.forEach(zone => counts[zone]++);
+    });
+    // Ищем зону, которую игрок защищал меньше всего
+    return Object.keys(counts).reduce((a, b) => counts[a] < counts[b] ? a : b);
+}
 
 </script>
 <div id="result-overlay">
