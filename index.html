@@ -420,13 +420,10 @@
     }
 
     .log-msg { 
-        margin-bottom: 6px; 
-        padding-bottom: 6px; 
-        border-bottom: 1px solid #155332; 
+        margin-bottom: 8px; 
         line-height: 1.4;
-        /* Добавляем вызов анимации: */
         animation: log-slide-in 0.35s ease-out forwards; 
-    }    
+    }  
 
     /* Подсветка текста в логе */
     .crit { color: #FFD500; font-weight: bold; } .hit { color: #fff; font-weight: 600;}
@@ -435,6 +432,30 @@
     .warning { color: #FFD500; font-weight: bold; }
     .spell { color: #c39bd3; font-weight: 600; } .heal { color: #2ecc71; font-weight: 600; }
     .dot { color: #e74c3c; }
+
+    /* Красивый разделитель раундов */
+    .round-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: #FFD500; /* Золотой текст */
+        font-weight: 800;
+        font-size: 15px;
+        letter-spacing: 2px;
+        margin: 18px 0 12px 0; /* Отступы вместо <br> */
+        text-shadow: 0 0 8px rgba(255, 213, 0, 0.4); /* Легкое свечение */
+    }
+    
+    /* Рисуем боковые линии */
+    .round-header::before, 
+    .round-header::after {
+        content: "";
+        flex: 1; /* Линии займут всё свободное место по бокам */
+        border-bottom: 2px solid rgba(209, 165, 5, 0.6); /* Темно-золотая линия */
+        margin: 0 12px; /* Отступ линий от текста */
+        box-shadow: 0 1px 2px rgba(0,0,0,0.5); /* Объемчик */
+    }
 
     /* Лейаут боя */
     .combat-layout { display: flex; flex-direction: column; gap: 12px; }
@@ -980,8 +1001,8 @@
             {id: "incendiary", name: "🔥 Зажигательный болт", cost: 4, type: "skill", desc: "3-5 урона + взрыв вешает Горение (1 урон на 2 хода)."}
         ]},
         plague_doctor: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
-            {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона и удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода)."},
-            {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 1, а ваши атаки получают 40% шанс проигнорировать блок."}
+        {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона. Увеличивает текущий урон Яда на враге на +2 и продлевает его до 2 ходов."}
+        {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 1, а ваши атаки получают 40% шанс проигнорировать блок."}
         ]},
         warlock: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
             {id: "hex", name: "💀 Сглаз", cost: 4, type: "skill", desc: "Наносит 3-4 маг. урона. Добавляет +2 урона к Проклятию на враге (на 2 хода)."},
@@ -1852,17 +1873,17 @@
         }
         
         else if(skillId === "catalyst") {
-            let r = dealSkillDamage(caster, target, getRnd(2, 3), true);
-            let pMsg = "";
-            if (target.effects.poison.t > 0 && target.effects.poison.a > 0) {
-                target.effects.poison.a *= 2;
-                target.effects.poison.t = 1; // Сброс до 1 хода
-                pMsg = ` 🟢 Яд мутирует! Урон яда удвоен (до ${target.effects.poison.a}), но спадет через 1 ход.`;
-            } else {
-                pMsg = ` (На враге нет яда для мутации).`;
-            }
-            logMsg(`🧪 ${cName} бросает Катализатор (${r.dmg} ур)!${pMsg}${r.msg}`, "spell");
-        }
+    let r = dealSkillDamage(caster, target, getRnd(2, 3), true);
+    let pMsg = "";
+    if (target.effects.poison.t > 0 && target.effects.poison.a > 0) {
+        target.effects.poison.a += 2; // Просто прибавляем 2 вместо умножения
+        target.effects.poison.t = 2;  // Продлеваем до 2 ходов
+        pMsg = ` 🟢 Яд сгущается! Урон яда увеличен на +2 (до ${target.effects.poison.a}) и продлен до 2 ходов.`;
+    } else {
+        pMsg = ` (На враге нет яда для мутации).`;
+    }
+    logMsg(`🧪 ${cName} бросает Катализатор (${r.dmg} ур)!${pMsg}${r.msg}`, "spell");
+}
         else if(skillId === "miasma") {
             caster.effects.miasma = {t:2};
             let sMsg = applyStatus(caster, target, "dmgDebuff", 2, 1);
@@ -2264,7 +2285,8 @@ if (bot.hasPotion && bot.hp <= 20 && !["mana_shield", "dark_armor", "honey"].inc
 }
 }
 
-        logMsg(`<br>[--- РАУНД ${roundNum} ---]`, "system");
+       
+        logMsg(`⚔️ РАУНД ${roundNum} ⚔️`, "round-header");
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
         player.d20Rolled = bot.d20Rolled = false;
         player.crossbowJam = bot.crossbowJam = false;
