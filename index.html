@@ -1001,7 +1001,7 @@
             {id: "incendiary", name: "🔥 Зажигательный болт", cost: 4, type: "skill", desc: "3-5 урона + взрыв вешает Горение (1 урон на 2 хода)."}
         ]},
         plague_doctor: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
-        {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона. Увеличивает текущий урон Яда на враге на +2 и продлевает его до 2 ходов."}
+        {id: "catalyst", name: "⚗️ Катализатор", cost: 5, type: "skill", desc: "Наносит 2-3 маг. урона. Увеличивает текущий урон Яда на враге на +2 и продлевает его до 2 ходов."}, // <--- ВОТ ТУТ НУЖНА ЗАПЯТАЯ
         {id: "miasma", name: "🧪 Миазмы", cost: 4, type: "skill", desc: "На 2 хода снижает урон врага на 1, а ваши атаки получают 40% шанс проигнорировать блок."}
         ]},
         warlock: { hp: 60, res: "mana", minD: 3, maxD: 5, skills: [
@@ -2273,20 +2273,31 @@ else {
     bBlocks = smartBlock || ["1,2", "2,3", "3,4", "1,4"][Math.floor(Math.random() * 4)].split(",");
     
     let botSpells = [];
-    if(bot.hasPotion && bot.hp < bot.maxHp * 0.4) botSpells.push("potion");
-    C_DATA[bot.fClass].skills.forEach(s => { 
-        if(bot.res >= s.cost && !bot.cooldowns[s.id]) botSpells.push(s.id); 
-    });
-    if(botSpells.length > 0 && Math.random() < 0.75) bSpell = pickRandom(botSpells);
-    // УНИВЕРСАЛЬНАЯ АПТЕЧКА ДЛЯ ВСЕХ БОТОВ
-// Если ХП критическое, зелье есть, а бот не запланировал важный защитный навык
-if (bot.hasPotion && bot.hp <= 20 && !["mana_shield", "dark_armor", "honey"].includes(bSpell)) {
-    bSpell = "potion";
-}
-}
+        if(bot.hasPotion && bot.hp < bot.maxHp * 0.4) botSpells.push("potion");
+        C_DATA[bot.fClass].skills.forEach(s => { 
+            if(bot.res >= s.cost && !bot.cooldowns[s.id]) botSpells.push(s.id); 
+        });
+        if(botSpells.length > 0 && Math.random() < 0.75) bSpell = pickRandom(botSpells);
+    } // <--- ВОТ ЭТА СКОБКА ДОЛЖНА БЫТЬ ЗДЕСЬ (закрывает блок else)
 
-       
-        logMsg(`⚔️ РАУНД ${roundNum} ⚔️`, "round-header");
+    // УНИВЕРСАЛЬНАЯ АПТЕЧКА ДЛЯ ВСЕХ БОТОВ
+    // Если ХП критическое, зелье есть, а бот не запланировал важный защитный навык
+    if (bot.hasPotion && bot.hp <= 20 && !["mana_shield", "dark_armor", "honey"].includes(bSpell)) {
+        bSpell = "potion";
+    }
+
+    // --- ФИКС СТАТИСТИКИ: Записываем попытки атак и блоков ---
+    player.matchStats.attacksByZone[pAtt]++;
+    if (pBlocks[0] !== "meditation") {
+        pBlocks.forEach(z => player.matchStats.blocksByZone[z]++);
+    }
+
+    bot.matchStats.attacksByZone[bAtt]++;
+    if (bBlocks[0] !== "meditation") {
+        bBlocks.forEach(z => bot.matchStats.blocksByZone[z]++);
+    }
+
+    logMsg(`<br>⚔️ РАУНД ${roundNum} ⚔️`, "round-header");
         player.dealtPhysDmgThisTurn = bot.dealtPhysDmgThisTurn = false;
         player.d20Rolled = bot.d20Rolled = false;
         player.crossbowJam = bot.crossbowJam = false;
