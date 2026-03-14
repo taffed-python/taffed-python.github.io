@@ -261,13 +261,11 @@
     border: 1px solid #D1A505;
 }
 
-/* Фантомная полоска (Желтая, объемная) */
+/* Фантомная полоска (Призрачная, серебристая) */
 .hp-ghost {
     position: absolute;
     top: 0; left: 0; height: 100%;
-    /* Вертикальный градиент: от светлого золотого к темному для объема */
-    background: linear-gradient(180deg, #FFD500 0%, #D1A505 100%);
-    opacity: 0.85; /* Сделали ярче, убрав сильную прозрачность */
+    background: linear-gradient(90deg, #7f8c8d, #bdc3c7, #95a5a6, #bdc3c7, #7f8c8d);
     transition: width 1.5s ease-out; 
     z-index: 1;
 }
@@ -1265,7 +1263,7 @@
             if(document.getElementById("p-hp-ghost")) {
                 document.getElementById("p-hp-ghost").style.width = `${(player.hp/player.maxHp)*100}%`;
             }
-        }, 600);
+        }, 800);
 
         // --- РЕСУРСЫ ИГРОКА ---
         document.getElementById("p-res-text").innerText = `${player.res}/${player.maxRes} ` + (player.resType==="energy"?"Эн.":"Ман.");
@@ -1298,7 +1296,7 @@
             if(document.getElementById("b-hp-ghost")) {
                 document.getElementById("b-hp-ghost").style.width = `${(bot.hp/bot.maxHp)*100}%`;
             }
-        }, 600);
+        }, 800);
 
         // --- РЕСУРСЫ ВРАГА ---
         document.getElementById("b-res-text").innerText = `${bot.res}/${bot.maxRes} ` + (bot.resType==="energy"?"Эн.":"Ман.");
