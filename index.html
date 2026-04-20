@@ -2129,11 +2129,17 @@ else if (bot.fClass === "paladin") {
 }
 else if (bot.fClass === "mage") {
     // 1. АТАКА: Если на игроке есть дебафф, бьет прицельно (урон повышен)
-    if (player.hasAnyDebuff()) {
-        bAtt = predictWeakestZone(playerBlockHistory);
+    if (this.type === 'mage' && player.hasAnyDebuff()) {
+    let predicted = predictWeakestZone(playerBlockHistory);
+    
+    // Если предсказание выдало валидную зону, используем её
+    if (predicted >= 1 && predicted <= 4) {
+        bAtt = predicted;
     } else {
+        // Если предсказание сломалось, Маг не тупит, а бьет наугад
         bAtt = Math.floor(Math.random() * 4) + 1;
     }
+}
 
     // 2. НАВЫКИ: Защита и поджог
     bSpell = "none";
@@ -2515,21 +2521,37 @@ else {
         document.getElementById("stats-modal").classList.remove("show");
     }
 
+// Финальный безопасный вариант
 function predictWeakestZone(history) {
-    if (history.length < 3) return Math.floor(Math.random() * 4) + 1;
-    let counts = {1:0, 2:0, 3:0, 4:0};
+    // 1. Если истории мало, сразу возвращаем рандом
+    if (!history || history.length < 3) return Math.floor(Math.random() * 4) + 1;
+
+    let counts = {1: 0, 2: 0, 3: 0, 4: 0};
     
     history.forEach(blockSet => {
-        blockSet.forEach(zone => {
-            // Исправление: игнорируем медитацию при подсчете зон
-            if (zone !== "meditation") {
-                counts[zone]++;
-            }
-        });
+        if (Array.isArray(blockSet)) {
+            blockSet.forEach(zone => {
+                // Считаем только если это зона 1, 2, 3 или 4
+                if (counts.hasOwnProperty(zone)) {
+                    counts[zone]++;
+                }
+            });
+        }
     });
-    
-    // Ищем зону, которую игрок защищал меньше всего
-    return Object.keys(counts).reduce((a, b) => counts[a] < counts[b] ? a : b);
+
+    // Находим зону с минимальным количеством блоков
+    const zones = Object.keys(counts);
+    let weakest = zones.reduce((a, b) => counts[a] < counts[b] ? a : b);
+
+    // 2. Гарантируем, что на выходе число, а не строка "1"
+    let result = parseInt(weakest);
+
+    // 3. Финальная проверка: если что-то пошло не так (NaN или вне диапазона) — рандом
+    if (isNaN(result) || result < 1 || result > 4) {
+        return Math.floor(Math.random() * 4) + 1;
+    }
+
+    return result;
 }
 
 </script>
