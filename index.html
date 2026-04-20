@@ -2518,9 +2518,16 @@ else {
 function predictWeakestZone(history) {
     if (history.length < 3) return Math.floor(Math.random() * 4) + 1;
     let counts = {1:0, 2:0, 3:0, 4:0};
+    
     history.forEach(blockSet => {
-        blockSet.forEach(zone => counts[zone]++);
+        blockSet.forEach(zone => {
+            // Исправление: игнорируем медитацию при подсчете зон
+            if (zone !== "meditation") {
+                counts[zone]++;
+            }
+        });
     });
+    
     // Ищем зону, которую игрок защищал меньше всего
     return Object.keys(counts).reduce((a, b) => counts[a] < counts[b] ? a : b);
 }
