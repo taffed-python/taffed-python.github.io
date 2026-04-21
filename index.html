@@ -832,7 +832,7 @@
             <label class="class-card">
                 <input type="radio" name="f_class" value="paladin">
                 <div class="class-header">✝️ Паладин (60 HP)</div>
-                <div class="class-desc">Удачный блок лечит 1-2 HP. 25% шанс ударить магией света (+3 урона) при атаке.</div>
+                <div class="class-desc">Удачный блок лечит 1 HP. 25% шанс ударить магией света (+3 урона) при атаке.</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Карающий удар (5 Маны):</b> 3-4 физ. и 2-3 маг. урона. Физика блокируется. Снижает атаку врага на 2 на 1 ход.<br>
                     <b>Святая Клятва (4 Маны):</b> На 2 хода ваши успешные блоки наносят 3 маг. урона атакующему.
@@ -850,7 +850,7 @@
             <label class="class-card">
                 <input type="radio" name="f_class" value="plague_doctor">
                 <div class="class-header">🧪 Чумной доктор (60 HP)</div>
-                <div class="class-desc">Успешный удар лечит на 1 (по отравленному 2) и вешает Яд. 25% шанс отравить атакующего.</div>
+                <div class="class-desc">Успешный удар лечит на 1 ХП и вешает Яд. 25% шанс отравить атакующего.</div>
                 <div class="skills-reveal"><div class="skills-inner">
                     <b>Катализатор (5 Маны):</b> 2-3 маг. урона + удваивает текущий урон Яда на враге (таймер сбрасывается до 1 хода).<br>
                     <b>Миазмы (4 Маны):</b> На 2 хода: урон врага снижен на 1, а ваши атаки с шансом 40% игнорируют блок.
@@ -1034,9 +1034,9 @@
         "rogue": "Пассивка: 22% шанс увернуться. 30% шанс нанести двойной удар (50% урона, пробивает блок).",
         "berserker": "Пассивка: +1 урон за каждые 10 потерянных HP. 25% шанс контрудара (лечит 3-4 ХП и вешает Кровотечение).",
         "mage": "Пассивка: Атаки посохом наносят на 2 урона больше, если на враге висит любой дебафф.",
-        "paladin": "Пассивка: Удачный блок лечит 1-2 HP. 25% шанс добавить +3 урона магией света при любой атаке.",
+        "paladin": "Пассивка: Удачный блок лечит 1 HP. 25% шанс добавить +3 урона магией света при любой атаке.",
         "crossbowman": "Пассивка: 25% шанс прострелить колено (-2 урона врагу). Любой выстрел в блок наносит минимум 2 урона.",
-        "plague_doctor": "Пассивка: Удар лечит 1 ХП (по отравленному 2 ХП) и вешает Яд. 25% шанс отравить атакующего при получении урона.",
+        "plague_doctor": "Пассивка: Удар лечит 1 ХП и вешает Яд. 25% шанс отравить атакующего при получении урона.",
         "warlock": "Пассивка: Успешная атака дает +1 к Проклятию. В конце хода лечит 1 HP, если враг проклят.",
         "shieldbearer": "Пассивка: Любой получаемый урон снижен на 1. 25% шанс дополнительно заблокировать 3-4 урона.",
         "beekeeper": "Пассивка: Удачные атаки копят Рой (до 3). При получении урона 25% шанс снизить его на 2 и повесить Липкие руки.",
@@ -1629,9 +1629,9 @@
                 } else {
                     let blockMsg = `🛡️ ${def.logName} блокирует удар в ${zoneText}.`;
                     if (def.fClass === "paladin") {
-                        let healAmt = getRnd(1, 2); def.heal(healAmt); blockMsg += ` ♱ Свет лечит на ${healAmt} HP!`;
-                        if(def.effects.thorns.t > 0) { let r = dealSkillDamage(def, att, 3, true); blockMsg += ` ⚡ Шипы бьют (${r.dmg} ур)!${r.msg}`; }
-                    }
+    let healAmt = 1; def.heal(healAmt); blockMsg += ` ♱ Свет лечит на ${healAmt} HP!`;
+    if(def.effects.thorns.t > 0) { let r = dealSkillDamage(def, att, 3, true); blockMsg += ` ⚡ Шипы бьют (${r.dmg} ур)!${r.msg}`; }
+}
                     return [d20Msg + blockMsg, "block"];
                 }
             }
@@ -1716,11 +1716,11 @@
             msg += ` ☀️ Вспышка Света (${r.dmg} ур)!${r.msg}`;
         }
         if (att.fClass === "plague_doctor" && fixedDmg === null) {
-            let healAmt = def.effects.poison.t > 0 ? 2 : 1; // Всегда 1, а по отравленному 2
-            att.heal(healAmt);
-            let sMsg = applyStatus(att, def, "poison", 2, 1, true); 
-            msg += ` 🩸 Вампиризм (+${healAmt} HP)! ⚗️ Яд усилен.${sMsg}`;
-        }
+    let healAmt = 1; // Теперь всегда лечит строго на 1 ХП
+    att.heal(healAmt);
+    let sMsg = applyStatus(att, def, "poison", 2, 1, true); 
+    msg += ` 🩸 Вампиризм (+${healAmt} HP)! ⚗️ Яд усилен.${sMsg}`;
+}
         if (att.fClass === "crossbowman" && Math.random() < 0.25) {
             msg += applyStatus(att, def, "dmgDebuff", 2, 2); msg += ` 🦵 Прострел ноги (-2 урон врага)!`;
         }
