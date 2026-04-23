@@ -2129,17 +2129,19 @@ else if (bot.fClass === "paladin") {
 }
 else if (bot.fClass === "mage") {
     // 1. АТАКА: Если на игроке есть дебафф, бьет прицельно (урон повышен)
-    if (this.type === 'mage' && player.hasAnyDebuff()) {
-    let predicted = predictWeakestZone(playerBlockHistory);
-    
-    // Если предсказание выдало валидную зону, используем её
-    if (predicted >= 1 && predicted <= 4) {
-        bAtt = predicted;
+    if (player.hasAnyDebuff()) {
+        let predicted = predictWeakestZone(playerBlockHistory);
+        
+        // Если предсказание выдало валидную зону, используем её
+        if (predicted >= 1 && predicted <= 4) {
+            bAtt = predicted;
+        } else {
+            bAtt = Math.floor(Math.random() * 4) + 1;
+        }
     } else {
-        // Если предсказание сломалось, Маг не тупит, а бьет наугад
+        // Если дебаффа нет, Маг просто бьет наугад
         bAtt = Math.floor(Math.random() * 4) + 1;
     }
-}
 
     // 2. НАВЫКИ: Защита и поджог
     bSpell = "none";
